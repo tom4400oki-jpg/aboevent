@@ -7,8 +7,8 @@ import Footer from '@/components/footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'AboEvent - イベント予約プラットフォーム',
-    description: '最高のイベントを見つけて予約しよう。',
+    title: 'KPIイベント - テニス・フットサル交流会',
+    description: '東戸塚で開催されるテニス・フットサルのイベントサイトです。初心者から上級者まで、みんなで楽しく汗を流しましょう！',
 }
 
 export default async function RootLayout({

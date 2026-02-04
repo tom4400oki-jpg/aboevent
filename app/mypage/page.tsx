@@ -18,19 +18,16 @@ export default async function MyPage() {
         .single()
 
     return (
-        <main className="mx-auto max-w-2xl">
-            <div className="space-y-6 sm:px-6 lg:col-span-9 lg:px-0">
-                <section aria-labelledby="payment-details-heading">
-                    <div className="bg-white shadow sm:rounded-md sm:overflow-hidden rounded-xl">
-                        <div className="px-4 py-5 sm:p-6">
-                            <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">プロフィール設定</h2>
-                            <ProfileForm
-                                initialFullName={profile?.full_name ?? null}
-                                email={profile?.email ?? user.email ?? ''}
-                            />
-                        </div>
-                    </div>
-                </section>
+        <main className="mx-auto max-w-2xl py-10 px-4 sm:px-6 lg:px-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">マイページ</h1>
+            <div className="bg-white shadow sm:rounded-md sm:overflow-hidden rounded-xl">
+                <div className="px-4 py-5 sm:p-6">
+                    <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">プロフィール設定</h2>
+                    <ProfileForm
+                        initialFullName={profile?.full_name ?? null}
+                        email={profile?.email ?? user.email ?? ''}
+                    />
+                </div>
             </div>
         </main>
     )

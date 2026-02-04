@@ -4,17 +4,20 @@
 
 :root {
   --foreground-rgb: 15, 23, 42;
-  /* Slate 900 */
-  --background-start-rgb: 248, 250, 252;
-  /* Slate 50 */
-  --background-end-rgb: 255, 255, 255;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 245, 247, 255;
+  --accent-orange: 255, 126, 54;
+  /* #FF7E36 */
+  --accent-green: 34, 197, 94;
+  /* #22C55E */
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
-      rgb(var(--background-start-rgb)),
-      rgb(var(--background-end-rgb)));
+  background-color: rgb(var(--background-start-rgb));
+  background-image:
+    linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
+  background-size: 100% 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

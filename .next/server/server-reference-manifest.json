@@ -1,62 +1,98 @@
 {
   "node": {
-    "4027670138e6016e51053b442f777346acb4c08def": {
-      "workers": {
-        "app/login/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Clogin%5C%5Cactions.ts%22%2C%5B%5B%224027670138e6016e51053b442f777346acb4c08def%22%2C%22signup%22%5D%2C%5B%2240ef333b8cf288a65fa148e1554ae44b784a5cbe0d%22%2C%22login%22%5D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/login/page": "action-browser"
-      }
-    },
-    "40ef333b8cf288a65fa148e1554ae44b784a5cbe0d": {
-      "workers": {
-        "app/login/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Clogin%5C%5Cactions.ts%22%2C%5B%5B%224027670138e6016e51053b442f777346acb4c08def%22%2C%22signup%22%5D%2C%5B%2240ef333b8cf288a65fa148e1554ae44b784a5cbe0d%22%2C%22login%22%5D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/login/page": "action-browser"
-      }
-    },
-    "40897a3bd12e4c3e2cf1bcc1cbea60123f94c24989": {
-      "workers": {
-        "app/events/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/events/[id]/page": "action-browser"
-      }
-    },
-    "0027b1be726a9e020f458fc6ea535095c9725f3553": {
+    "006e88b1191b28ecc276244c70eeaa60fa6e8cea35": {
       "workers": {
         "app/page": {
-          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
           "async": false
         },
-        "app/login/page": {
-          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+        "app/bookings/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
           "async": false
         },
-        "app/events/[id]/page": {
-          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+        "app/_not-found/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/admin/events/new/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%2C%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cadmin%5C%5Cactions.ts%22%2C%5B%5B%2240d7aabd2d45bb7040e2296c61bb45ebf7adf7a60d%22%2C%22createEvent%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/messages/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
           "async": false
         },
         "app/mypage/page": {
-          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/events/[id]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%5D&__client_imported__=!",
           "async": false
         }
       },
       "layer": {
         "app/page": "rsc",
-        "app/login/page": "rsc",
-        "app/events/[id]/page": "rsc",
-        "app/mypage/page": "rsc"
+        "app/bookings/page": "rsc",
+        "app/_not-found/page": "rsc",
+        "app/admin/events/new/page": "rsc",
+        "app/messages/page": "rsc",
+        "app/mypage/page": "rsc",
+        "app/events/[id]/page": "rsc"
+      }
+    },
+    "40d7aabd2d45bb7040e2296c61bb45ebf7adf7a60d": {
+      "workers": {
+        "app/admin/events/new/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cauth%5C%5Cactions.ts%22%2C%5B%5B%22006e88b1191b28ecc276244c70eeaa60fa6e8cea35%22%2C%22signOut%22%5D%5D%5D%2C%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cadmin%5C%5Cactions.ts%22%2C%5B%5B%2240d7aabd2d45bb7040e2296c61bb45ebf7adf7a60d%22%2C%22createEvent%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/admin/events/new/page": "rsc"
+      }
+    },
+    "40897a3bd12e4c3e2cf1bcc1cbea60123f94c24989": {
+      "workers": {
+        "app/bookings/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%2C%5B%22408f7e010552f66286b6e7dba2c12919288b73930e%22%2C%22cancelBooking%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/events/[id]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%2C%5B%22408f7e010552f66286b6e7dba2c12919288b73930e%22%2C%22cancelBooking%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/bookings/page": "action-browser",
+        "app/events/[id]/page": "action-browser"
+      }
+    },
+    "408f7e010552f66286b6e7dba2c12919288b73930e": {
+      "workers": {
+        "app/bookings/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%2C%5B%22408f7e010552f66286b6e7dba2c12919288b73930e%22%2C%22cancelBooking%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/events/[id]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%2C%5B%22408f7e010552f66286b6e7dba2c12919288b73930e%22%2C%22cancelBooking%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/bookings/page": "action-browser",
+        "app/events/[id]/page": "action-browser"
+      }
+    },
+    "607e84715efff402d821e9f00a43c2f8068c65b501": {
+      "workers": {
+        "app/messages/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cmessages%5C%5Cactions.ts%22%2C%5B%5B%22607e84715efff402d821e9f00a43c2f8068c65b501%22%2C%22sendMessage%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/messages/page": "action-browser"
       }
     },
     "40efadfafa930732297e716e140417b94f2e9a44fa": {

@@ -13,11 +13,25 @@ export async function updateProfile(formData: FormData) {
     }
 
     const fullName = formData.get('fullName') as string
-    // Avatar URL update logic could be added here later
+    const gender = formData.get('gender') as string
+    const birthdate = formData.get('birthdate') as string
+    const residence = formData.get('residence') as string
+    const tennis_level = formData.get('tennis_level') ? parseInt(formData.get('tennis_level') as string) : null
+    const futsal_level = formData.get('futsal_level') ? parseInt(formData.get('futsal_level') as string) : null
+    const referral_source = formData.get('referral_source') as string
 
     const { error } = await supabase
         .from('profiles')
-        .update({ full_name: fullName, updated_at: new Date().toISOString() })
+        .update({
+            full_name: fullName,
+            gender,
+            birthdate: birthdate || null,
+            residence,
+            tennis_level,
+            futsal_level,
+            referral_source,
+            updated_at: new Date().toISOString()
+        })
         .eq('id', user.id)
 
     if (error) {
