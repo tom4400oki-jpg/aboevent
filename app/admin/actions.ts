@@ -113,7 +113,7 @@ export async function updateProfile(formData: FormData) {
     const { error } = await supabaseAdmin
         .from('profiles')
         .update({
-            full_name,
+            full_name: full_name || null,
             role,
             updated_at: new Date().toISOString(),
         })

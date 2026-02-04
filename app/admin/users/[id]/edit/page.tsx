@@ -48,7 +48,7 @@ export default async function EditUserPage({
 
                 <div>
                     <label className="block text-sm font-bold text-gray-700">氏名</label>
-                    <input type="text" name="full_name" required defaultValue={profile.full_name || ''} className="mt-1 block w-full rounded-md border-gray-300 border p-2" />
+                    <input type="text" name="full_name" defaultValue={profile.full_name || ''} className="mt-1 block w-full rounded-md border-gray-300 border p-2" />
                 </div>
 
                 <div>
