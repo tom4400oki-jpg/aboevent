@@ -1,0 +1,76 @@
+{
+  "node": {
+    "4027670138e6016e51053b442f777346acb4c08def": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Clogin%5C%5Cactions.ts%22%2C%5B%5B%224027670138e6016e51053b442f777346acb4c08def%22%2C%22signup%22%5D%2C%5B%2240ef333b8cf288a65fa148e1554ae44b784a5cbe0d%22%2C%22login%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser"
+      }
+    },
+    "40ef333b8cf288a65fa148e1554ae44b784a5cbe0d": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Clogin%5C%5Cactions.ts%22%2C%5B%5B%224027670138e6016e51053b442f777346acb4c08def%22%2C%22signup%22%5D%2C%5B%2240ef333b8cf288a65fa148e1554ae44b784a5cbe0d%22%2C%22login%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser"
+      }
+    },
+    "40897a3bd12e4c3e2cf1bcc1cbea60123f94c24989": {
+      "workers": {
+        "app/events/[id]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cevents%5C%5C%5Bid%5D%5C%5Cactions.ts%22%2C%5B%5B%2240897a3bd12e4c3e2cf1bcc1cbea60123f94c24989%22%2C%22bookEvent%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/events/[id]/page": "action-browser"
+      }
+    },
+    "0027b1be726a9e020f458fc6ea535095c9725f3553": {
+      "workers": {
+        "app/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/login/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/events/[id]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/mypage/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Ccomponents%5C%5Cnavbar.tsx%22%2C%5B%5B%220027b1be726a9e020f458fc6ea535095c9725f3553%22%2C%22%24%24RSC_SERVER_ACTION_0%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "rsc",
+        "app/login/page": "rsc",
+        "app/events/[id]/page": "rsc",
+        "app/mypage/page": "rsc"
+      }
+    },
+    "40efadfafa930732297e716e140417b94f2e9a44fa": {
+      "workers": {
+        "app/mypage/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5Cdev_app%5C%5Caboevent%5C%5Capp%5C%5Cmypage%5C%5Cactions.ts%22%2C%5B%5B%2240efadfafa930732297e716e140417b94f2e9a44fa%22%2C%22updateProfile%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/mypage/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "SnKWTOMgOktNwIf1ZuEoEPzzt59k58g8zGoeQO5E99w="
+}
