@@ -7,8 +7,8 @@ import Footer from '@/components/footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'KPIイベント - テニス・フットサル交流会',
-    description: '東戸塚で開催されるテニス・フットサルのイベントサイトです。初心者から上級者まで、みんなで楽しく汗を流しましょう！',
+    title: 'Funny-Spo | 「笑って痩せる」社会人サークル',
+    description: 'Funny-Spo（ファニスポ）は、運動不足の社会人が集まる「世界一ゆるい」スポーツサークルです。テニスやフットサルを遊び感覚で楽しみながら、ダイエットと友達作りを叶えます。初心者・お一人様大歓迎！',
 }
 
 export default async function RootLayout({

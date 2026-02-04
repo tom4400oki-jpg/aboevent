@@ -8,12 +8,15 @@ interface PageProps {
     }>
 }
 
+import { canManageEvents } from '@/utils/admin'
+
 export default async function AdminChatPage({ params }: PageProps) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const { userId } = await params
+    const hasAccess = await canManageEvents()
 
-    if (!user || user.email !== 'tom4400oki@gmail.com') {
+    if (!hasAccess || !user) {
         redirect('/')
     }
 

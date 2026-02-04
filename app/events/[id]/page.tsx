@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import ReserveButton from './reserve-button'
 import Link from 'next/link'
 import EventGallery from '@/components/event-gallery'
+import { canManageEvents } from '@/utils/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,10 +84,21 @@ export default async function EventPage({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
 
                         {/* Title Overlay */}
-                        <div className="absolute bottom-0 left-0 p-6 sm:p-8 text-white w-full">
-                            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight drop-shadow-md">
+                        <div className="absolute bottom-0 left-0 p-6 sm:p-8 text-white w-full flex justify-between items-end">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight drop-shadow-md flex-1">
                                 {event.title}
                             </h1>
+
+                            {/* Admin Edit Button */}
+                            {(await canManageEvents()) && (
+                                <Link
+                                    href={`/admin/events/${event.id}/edit`}
+                                    className="ml-4 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/40 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2"
+                                >
+                                    <span>✏️</span>
+                                    <span>編集</span>
+                                </Link>
+                            )}
                         </div>
                     </div>
 

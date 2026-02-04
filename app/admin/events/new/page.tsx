@@ -1,12 +1,11 @@
-import { createClient } from '@/utils/supabase/server'
+import { canManageEvents } from '@/utils/admin'
 import { redirect } from 'next/navigation'
 import { createEvent } from '../../actions'
 
 export default async function NewEventPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const hasAccess = await canManageEvents()
 
-    if (!user || user.email !== 'tom4400oki@gmail.com') {
+    if (!hasAccess) {
         redirect('/')
     }
 
@@ -53,6 +52,7 @@ export default async function NewEventPage() {
                         <select name="category" required className="mt-1 block w-full rounded-md border-gray-300 border p-2">
                             <option value="futsal">フットサル ⚽</option>
                             <option value="tennis">テニス 🎾</option>
+                            <option value="volleyball">バレー 🏐</option>
                             <option value="other">その他</option>
                         </select>
                     </div>
