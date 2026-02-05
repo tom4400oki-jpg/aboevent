@@ -5,11 +5,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { isAdmin, canManageEvents } from '@/utils/admin'
 import { createAdminClient } from '@/utils/supabase/admin-client'
+import { ensureJSTOffset } from '@/utils/date'
 
 export async function createEvent(formData: FormData) {
-    const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
 
-    // 1. Auth Check
     // 1. Auth Check
     const hasAccess = await canManageEvents()
     if (!hasAccess) {
@@ -19,8 +19,14 @@ export async function createEvent(formData: FormData) {
     // 2. Extract Data
     const title = formData.get('title') as string
     const description = formData.get('description') as string
-    const start_at = formData.get('start_at') as string
-    const end_at = formData.get('end_at') as string
+    const event_date = formData.get('event_date') as string
+    const start_time = formData.get('start_time') as string
+    const end_time = formData.get('end_time') as string
+
+    // Combine date and time with JST offset
+    const start_at = `${event_date}T${start_time}:00+09:00`
+    const end_at = `${event_date}T${end_time}:00+09:00`
+
     const location = formData.get('location') as string
     const price = formData.get('price') ? parseInt(formData.get('price') as string) : 0
     const capacity = formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 10
@@ -28,7 +34,7 @@ export async function createEvent(formData: FormData) {
     const image_url = formData.get('image_url') as string
 
     // 3. Insert
-    const { error } = await supabase.from('events').insert({
+    const { error } = await supabaseAdmin.from('events').insert({
         title,
         description,
         start_at,
@@ -49,9 +55,8 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(formData: FormData) {
-    const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
 
-    // 1. Auth Check
     // 1. Auth Check
     const hasAccess = await canManageEvents()
     if (!hasAccess) {
@@ -62,8 +67,14 @@ export async function updateEvent(formData: FormData) {
     const id = formData.get('id') as string
     const title = formData.get('title') as string
     const description = formData.get('description') as string
-    const start_at = formData.get('start_at') as string
-    const end_at = formData.get('end_at') as string
+    const event_date = formData.get('event_date') as string
+    const start_time = formData.get('start_time') as string
+    const end_time = formData.get('end_time') as string
+
+    // Combine date and time with JST offset
+    const start_at = `${event_date}T${start_time}:00+09:00`
+    const end_at = `${event_date}T${end_time}:00+09:00`
+
     const location = formData.get('location') as string
     const price = formData.get('price') ? parseInt(formData.get('price') as string) : 0
     const capacity = formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 10
@@ -71,7 +82,7 @@ export async function updateEvent(formData: FormData) {
     const image_url = formData.get('image_url') as string
 
     // 3. Update
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('events')
         .update({
             title,

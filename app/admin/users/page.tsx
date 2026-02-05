@@ -77,9 +77,19 @@ export default async function AdminUsersPage() {
                                         <div className="text-sm text-gray-500">{profile.email}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${profile.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
-                                            {profile.role === 'admin' ? '管理者' : '一般'}
-                                        </span>
+                                        {profile.role === 'admin' ? (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                                管理者
+                                            </span>
+                                        ) : profile.role === 'moderator' ? (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                副管理者
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                一般
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end gap-2">

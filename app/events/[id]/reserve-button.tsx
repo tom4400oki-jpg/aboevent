@@ -8,9 +8,10 @@ interface ReserveButtonProps {
     eventId: string
     loggedIn: boolean
     isBooked: boolean
+    disabled?: boolean
 }
 
-export default function ReserveButton({ eventId, loggedIn, isBooked }: ReserveButtonProps) {
+export default function ReserveButton({ eventId, loggedIn, isBooked, disabled }: ReserveButtonProps) {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
 
@@ -37,10 +38,11 @@ export default function ReserveButton({ eventId, loggedIn, isBooked }: ReserveBu
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 pb-8 safe-area-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40">
                 <div className="mx-auto max-w-lg">
                     <Link
-                        href="/login"
-                        className={`${buttonClasses} bg-gray-800 hover:bg-gray-700 shadow-gray-200`}
+                        href={disabled ? "#" : "/login"}
+                        className={`${buttonClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-700 shadow-gray-200'}`}
+                        onClick={(e) => disabled && e.preventDefault()}
                     >
-                        ログインして予約する
+                        {disabled ? '受付終了しました' : 'ログインして予約する'}
                     </Link>
                 </div>
             </div>
@@ -77,10 +79,11 @@ export default function ReserveButton({ eventId, loggedIn, isBooked }: ReserveBu
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 pb-8 safe-area-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40">
                 <div className="mx-auto max-w-lg">
                     <button
-                        onClick={() => setIsModalOpen(true)}
-                        className={`${buttonClasses} bg-indigo-600 hover:bg-indigo-500 shadow-indigo-200`}
+                        onClick={() => !disabled && setIsModalOpen(true)}
+                        disabled={disabled}
+                        className={`${buttonClasses} ${disabled ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-200'}`}
                     >
-                        予約へ進む
+                        {disabled ? '受付終了しました' : '予約へ進む'}
                     </button>
                 </div>
             </div>

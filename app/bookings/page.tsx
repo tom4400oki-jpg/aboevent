@@ -48,49 +48,51 @@ export default async function BookingsPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-3">
                     {bookings.map((booking: any) => {
-                        // Handle potential array response for joined table
                         const event = Array.isArray(booking.events) ? booking.events[0] : (booking.events as any)
-
                         if (!event) return null
 
                         return (
                             <div
                                 key={booking.id}
-                                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col"
+                                className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex items-center p-3 sm:p-4 gap-4"
                             >
-                                <Link href={`/events/${event.id}`} className="block flex-1 group-hover:opacity-95 transition-opacity">
-                                    <div className="aspect-[16/9] w-full bg-gray-100 relative overflow-hidden">
-                                        {event.image_url ? (
-                                            <img src={event.image_url} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center text-4xl">
-                                                🗓️
-                                            </div>
-                                        )}
-                                        <div className="absolute top-2 right-2 rounded-full bg-green-500/90 px-3 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-sm">
-                                            予約済み
+                                {/* Small Thumbnail */}
+                                <div className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                                    {event.image_url ? (
+                                        <img src={event.image_url} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="h-full w-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center text-xl">
+                                            🗓️
                                         </div>
-                                    </div>
+                                    )}
+                                </div>
 
-                                    <div className="p-5 pb-2">
-                                        <div className="text-sm font-bold text-indigo-600 mb-2">
-                                            {new Date(event.start_at).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' })}
-                                        </div>
-                                        <h3 className="font-bold text-gray-900 mb-3 text-lg leading-tight group-hover:text-indigo-600 transition-colors">
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-[10px] sm:text-xs font-bold text-indigo-600 mb-0.5">
+                                        {new Date(event.start_at).toLocaleDateString('ja-JP', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            weekday: 'short',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </div>
+                                    <Link href={`/events/${event.id}`}>
+                                        <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate group-hover:text-indigo-600 transition-colors">
                                             {event.title}
                                         </h3>
-                                        <div className="text-sm text-gray-500 flex items-center gap-1">
-                                            <span>📍</span> {event.location}
-                                        </div>
+                                    </Link>
+                                    <div className="text-[10px] sm:text-xs text-gray-500 truncate mt-0.5">
+                                        📍 {event.location}
                                     </div>
-                                </Link>
+                                </div>
 
-                                <div className="p-5 pt-2 mt-auto">
-                                    <div className="flex justify-end pt-3 border-t border-gray-100">
-                                        <CancelButton bookingId={booking.id} />
-                                    </div>
+                                {/* Actions */}
+                                <div className="flex-shrink-0">
+                                    <CancelButton bookingId={booking.id} />
                                 </div>
                             </div>
                         )
