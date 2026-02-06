@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import EventList from '@/components/event-list'
+import { createClient } from '@/utils/supabase/server'
+import EventMapWrapper from '@/components/event-map-wrapper'
 
 export const revalidate = 60
 
@@ -11,6 +13,14 @@ export default async function Home({
 }) {
     // Only await the search params to determine current filter state for UI
     const { category } = await searchParams
+
+    const supabase = await createClient()
+    const { data: eventsWithCoords } = await supabase
+        .from('events')
+        .select('id, title, latitude, longitude, category')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .limit(100)
 
     return (
         <main className="space-y-8">
@@ -72,6 +82,13 @@ export default async function Home({
                         >
                             バレー 🏐
                         </Link>
+                        <Link
+                            href="/?category=other"
+                            scroll={false}
+                            className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'other' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
+                        >
+                            その他
+                        </Link>
                     </div>
                 </div>
 
@@ -91,6 +108,24 @@ export default async function Home({
                 >
                     <EventList category={category} />
                 </Suspense>
+
+                {/* Map Section */}
+                <section className="mt-12 space-y-4">
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 px-2">
+                        <span>📍</span> 開催地マップ
+                    </h2>
+                    <div className="rounded-2xl overflow-hidden ring-1 ring-gray-200">
+                        <EventMapWrapper
+                            events={(eventsWithCoords || []).map(e => ({
+                                id: e.id,
+                                title: e.title,
+                                latitude: e.latitude!,
+                                longitude: e.longitude!,
+                                category: e.category || undefined
+                            }))}
+                        />
+                    </div>
+                </section>
             </div>
         </main>
     )

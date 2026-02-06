@@ -43,10 +43,15 @@ interface Event {
     start_at: string
     end_at: string
     location: string
+    nearest_station: string | null
     price: number | null
     description: string | null
     image_url: string | null
     category?: string
+    ask_transportation: boolean
+    transportation_info: string | null
+    latitude: number | null
+    longitude: number | null
 }
 
 export default async function EventPage({
@@ -60,7 +65,7 @@ export default async function EventPage({
 
         const { data: eventData, error } = await supabase
             .from('events')
-            .select('id, title, start_at, end_at, location, price, description, image_url, category')
+            .select('id, title, start_at, end_at, location, nearest_station, price, description, image_url, category, ask_transportation, transportation_info')
             .eq('id', id)
             .single()
 
@@ -88,9 +93,34 @@ export default async function EventPage({
         const isAdminUser = await canManageEvents()
         const isExpired = new Date(event.start_at) < new Date()
 
+        // Fetch all events for the map
+        const { data: allEvents } = await supabase
+            .from('events')
+            .select('id, title, latitude, longitude, category')
+
+        // Fetch gallery images from reports
+        const { data: reportImages } = await supabase
+            .from('report_images')
+            .select(`
+                image_url,
+                event_reports!inner (event_id)
+            `)
+            .eq('event_reports.event_id', id)
+
+        const galleryImages = (reportImages || []).map((img: any) => img.image_url)
+
+        const mapEvents = (allEvents || []).map(e => ({
+            id: e.id,
+            title: e.title,
+            latitude: e.latitude,
+            longitude: e.longitude,
+            category: e.category
+        }))
+
         return (
             <div className="min-h-screen bg-gray-50 pb-12">
                 {/* Hero Section with Image */}
+                {/* ... existing code ... */}
                 <div className="relative h-[40vh] min-h-[300px] w-full bg-gray-900">
                     {event.image_url ? (
                         <img
@@ -159,28 +189,41 @@ export default async function EventPage({
                                 <div className="rounded-xl bg-indigo-50 p-4 border border-indigo-100">
                                     <div className="text-sm font-semibold text-indigo-600 mb-1">場所</div>
                                     <div className="font-bold text-gray-900">{event.location}</div>
+                                    {event.nearest_station && (
+                                        <div className="text-sm text-gray-600">
+                                            ({event.nearest_station})
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="rounded-xl bg-indigo-50 p-4 border border-indigo-100">
                                     <div className="text-sm font-semibold text-indigo-600 mb-1">価格</div>
-                                    <div className="font-bold text-gray-900">¥{event.price?.toLocaleString() ?? 0}</div>
+                                    <div className="flex items-baseline gap-2">
+                                        <div className="font-bold text-gray-900 text-xl">¥{event.price?.toLocaleString() ?? 0}</div>
+                                        <div className="text-xs font-bold text-indigo-500">(当日現地払い)</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Payment & Access Info */}
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="flex items-center gap-3 p-4 rounded-xl bg-orange-50 text-orange-900 border border-orange-100">
-                                    <span className="text-2xl">💰</span>
-                                    <div>
-                                        <div className="text-xs font-bold text-orange-600 uppercase tracking-wide">お支払い</div>
-                                        <div className="font-medium">当日<strong>現地払い</strong>でお願いします</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 text-green-900 border border-green-100">
-                                    <span className="text-2xl">🚙</span>
-                                    <div>
-                                        <div className="text-xs font-bold text-green-600 uppercase tracking-wide">アクセス・送迎</div>
-                                        <div className="font-medium"><strong>東戸塚駅</strong>より送迎可 (※要相談)</div>
+                            {/* Access Info */}
+                            <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 text-green-900 border border-green-100 mb-4">
+                                <span className="text-2xl">🚙</span>
+                                <div>
+                                    <div className="text-xs font-bold text-green-600 uppercase tracking-wide">アクセス・送迎</div>
+                                    <div className="font-medium">
+                                        {event.transportation_info ? (
+                                            event.transportation_info
+                                        ) : (
+                                            <>
+                                                {event.nearest_station && <strong>{event.nearest_station}</strong>}
+                                                {event.ask_transportation && (
+                                                    <span>{event.nearest_station ? 'より' : ''}送迎可 (要相談)</span>
+                                                )}
+                                                {!event.nearest_station && !event.ask_transportation && (
+                                                    <span className="text-gray-400 italic">情報なし</span>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +239,7 @@ export default async function EventPage({
 
                         {/* Gallery Section */}
                         <div className="border-t border-gray-100 p-6 sm:p-8 bg-gray-50/50">
-                            <EventGallery />
+                            <EventGallery images={galleryImages} />
                         </div>
                     </article>
                 </div>
@@ -206,6 +249,7 @@ export default async function EventPage({
                     loggedIn={isLoggedIn}
                     isBooked={isBooked}
                     disabled={isExpired}
+                    askTransportation={event.ask_transportation}
                 />
             </div>
         )

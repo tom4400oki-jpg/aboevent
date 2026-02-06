@@ -27,7 +27,7 @@ export const isAdmin = cache(async (): Promise<boolean> => {
     }
 })
 
-export const getRole = cache(async (): Promise<'admin' | 'moderator' | 'user'> => {
+export const getRole = cache(async (): Promise<'admin' | 'moderator' | 'member' | 'lead' | 'user'> => {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -46,7 +46,7 @@ export const getRole = cache(async (): Promise<'admin' | 'moderator' | 'user'> =
             .single()
 
         if (error || !data) return 'user'
-        return (data.role as 'admin' | 'moderator' | 'user') || 'user'
+        return (data.role as 'admin' | 'moderator' | 'member' | 'lead' | 'user') || 'user'
     } catch {
         return 'user'
     }
@@ -57,3 +57,29 @@ export const canManageEvents = async () => {
     const role = await getRole()
     return role === 'admin' || role === 'moderator'
 }
+
+export const getAdminProfile = cache(async () => {
+    const supabase = await createClient()
+
+    // Try to find the primary admin (hardcoded as fallback for safety)
+    const adminEmail = 'tom4400oki@gmail.com'
+
+    const { data: admin } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .eq('role', 'admin')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+
+    if (admin) return admin
+
+    // Fallback if role is not set correctly yet
+    const { data: fallbackAdmin } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .eq('email', adminEmail)
+        .single()
+
+    return fallbackAdmin || null
+})

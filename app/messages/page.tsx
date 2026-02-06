@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { getAdminProfile } from '@/utils/admin'
 import ChatInterface from './chat-interface'
 
 export default async function MessagesPage() {
@@ -9,11 +10,7 @@ export default async function MessagesPage() {
     if (!user) redirect('/login')
 
     // Find Admin ID
-    const { data: adminProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', 'tom4400oki@gmail.com')
-        .single()
+    const adminProfile = await getAdminProfile()
 
     // Fetch messages between User and Admin
     const { data: messages } = await supabase

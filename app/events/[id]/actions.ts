@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
+import { getAdminProfile } from '@/utils/admin'
 
 export async function bookEvent(formData: FormData) {
     const supabase = await createClient()
@@ -44,12 +45,7 @@ export async function bookEvent(formData: FormData) {
 
     if (event) {
         // Find Admin ID
-        const adminEmail = 'tom4400oki@gmail.com'
-        const { data: adminProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', adminEmail)
-            .single()
+        const adminProfile = await getAdminProfile()
 
         if (adminProfile) {
             const eventDate = new Date(event.start_at).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' })
@@ -113,12 +109,7 @@ export async function cancelBooking(bookingId: string) {
         const eventStart = eventsData?.start_at
 
         // Find Admin ID
-        const adminEmail = 'tom4400oki@gmail.com'
-        const { data: adminProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', adminEmail)
-            .single()
+        const adminProfile = await getAdminProfile()
 
         if (adminProfile) {
             const eventDate = new Date(eventStart).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' })

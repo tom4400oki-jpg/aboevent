@@ -1,18 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 
-// Mock data for the gallery - in a real app, this would come from the database
-const MOCK_IMAGES = [
-    'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&q=80', // Futsal action
-    'https://images.unsplash.com/photo-1626244422230-0d12e6988f62?auto=format&fit=crop&q=80', // Tennis action
-    'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80', // Sports high five
-    'https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&q=80', // Happy team
-]
+interface EventGalleryProps {
+    images: string[]
+}
 
-export default function EventGallery() {
+export default function EventGallery({ images }: EventGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
+    if (!images || images.length === 0) return null
 
     return (
         <section className="mt-12">
@@ -23,7 +20,7 @@ export default function EventGallery() {
             </h3>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {MOCK_IMAGES.map((src, index) => (
+                {images.map((src, index) => (
                     <div
                         key={index}
                         className="relative aspect-square cursor-pointer overflow-hidden rounded-xl border-2 border-transparent hover:border-indigo-500 transition-all hover:scale-105 group"

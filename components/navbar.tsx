@@ -33,6 +33,15 @@ export default async function Navbar() {
                     </div>
                 </Link>
 
+                <div className="flex items-center gap-6">
+                    <Link href="/" className="text-sm font-bold text-gray-600 hover:text-indigo-600 transition-colors">
+                        イベント
+                    </Link>
+                    <Link href="/reports" className="text-sm font-bold text-gray-600 hover:text-indigo-600 transition-colors">
+                        活動レポート
+                    </Link>
+                </div>
+
                 <div className="flex items-center gap-4 sm:gap-6">
                     {user ? (
                         <>

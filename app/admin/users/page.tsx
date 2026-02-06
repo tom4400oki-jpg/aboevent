@@ -85,9 +85,17 @@ export default async function AdminUsersPage() {
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                 副管理者
                                             </span>
+                                        ) : profile.role === 'member' ? (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                                メンバー
+                                            </span>
+                                        ) : profile.role === 'lead' ? (
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                アム出し
+                                            </span>
                                         ) : (
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                一般
+                                                新規
                                             </span>
                                         )}
                                     </td>

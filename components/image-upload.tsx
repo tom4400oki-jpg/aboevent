@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import imageCompression from 'browser-image-compression'
 
 interface ImageUploadProps {
     defaultValue?: string
@@ -21,6 +22,20 @@ export default function ImageUpload({ defaultValue = '', name }: ImageUploadProp
         setError(null)
 
         try {
+            // Compress image before upload (Target: ~100KB)
+            const options = {
+                maxSizeMB: 0.1, // 100KB
+                maxWidthOrHeight: 1280,
+                useWebWorker: true,
+                onProgress: (progress: number) => {
+                    console.log('Compression progress:', progress)
+                }
+            }
+
+            const compressedFile = await imageCompression(file, options)
+            console.log(`Original size: ${(file.size / 1024).toFixed(2)} KB`)
+            console.log(`Compressed size: ${(compressedFile.size / 1024).toFixed(2)} KB`)
+
             const supabase = createClient()
 
             // Create a unique file name
@@ -31,7 +46,7 @@ export default function ImageUpload({ defaultValue = '', name }: ImageUploadProp
             // Upload to Supabase Storage
             const { error: uploadError, data } = await supabase.storage
                 .from('event-images')
-                .upload(filePath, file)
+                .upload(filePath, compressedFile)
 
             if (uploadError) throw uploadError
 

@@ -54,14 +54,18 @@ export default async function EditUserPage({
                 <div>
                     <label className="block text-sm font-bold text-gray-700">権限 (Role)</label>
                     <select name="role" required defaultValue={profile.role || 'user'} className="mt-1 block w-full rounded-md border-gray-300 border p-2">
-                        <option value="user">一般ユーザー (user)</option>
+                        <option value="user">新規 (user)</option>
+                        <option value="lead">アム出し (lead)</option>
+                        <option value="member">メンバー (member)</option>
                         <option value="moderator">副管理者 (moderator)</option>
                         <option value="admin">管理者 (admin)</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-1 space-y-1">
-                        <span className="block">・一般ユーザー: 一般機能のみ</span>
-                        <span className="block">・副管理者: イベント作成・編集、メッセージ機能</span>
-                        <span className="block">・管理者: 全機能（ユーザー管理を含む）</span>
+                        <span className="block">・新規: 初期状態。制限あり</span>
+                        <span className="block">・アム出し: 特定権限</span>
+                        <span className="block">・メンバー: 一般参加者</span>
+                        <span className="block">・副管理者: イベント・レポート管理</span>
+                        <span className="block">・管理者: 全機能（ユーザー管理含む）</span>
                     </p>
                 </div>
 

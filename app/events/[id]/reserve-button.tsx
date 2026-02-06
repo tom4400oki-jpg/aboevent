@@ -9,9 +9,10 @@ interface ReserveButtonProps {
     loggedIn: boolean
     isBooked: boolean
     disabled?: boolean
+    askTransportation?: boolean
 }
 
-export default function ReserveButton({ eventId, loggedIn, isBooked, disabled }: ReserveButtonProps) {
+export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, askTransportation = true }: ReserveButtonProps) {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
 
@@ -19,6 +20,12 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled }:
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const handleFormSubmit = async (formData: FormData) => {
+        // If transportation is not asked, set defaults
+        if (!askTransportation) {
+            formData.set('transportation', 'other')
+            formData.set('pickup_needed', 'off')
+        }
+
         startTransition(async () => {
             setError(null)
             const res = await bookEvent(formData)
@@ -106,37 +113,41 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled }:
                             <form action={handleFormSubmit} className="space-y-6">
                                 <input type="hidden" name="eventId" value={eventId} />
 
-                                <div className="space-y-3">
-                                    <label className="block text-sm font-bold text-gray-700">
-                                        当日の来場手段 <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="space-y-2">
-                                        <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
-                                            <input type="radio" name="transportation" value="car" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
-                                            <span className="ml-3 block text-sm font-medium text-gray-900">車 (自家用車など)</span>
-                                        </label>
-                                        <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
-                                            <input type="radio" name="transportation" value="train" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
-                                            <span className="ml-3 block text-sm font-medium text-gray-900">電車・バス</span>
-                                        </label>
-                                        <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
-                                            <input type="radio" name="transportation" value="other" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
-                                            <span className="ml-3 block text-sm font-medium text-gray-900">その他 (徒歩・自転車など)</span>
-                                        </label>
-                                    </div>
-                                </div>
+                                {askTransportation && (
+                                    <>
+                                        <div className="space-y-3">
+                                            <label className="block text-sm font-bold text-gray-700">
+                                                当日の来場手段 <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="space-y-2">
+                                                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
+                                                    <input type="radio" name="transportation" value="car" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                                    <span className="ml-3 block text-sm font-medium text-gray-900">車 (自家用車など)</span>
+                                                </label>
+                                                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
+                                                    <input type="radio" name="transportation" value="train" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                                    <span className="ml-3 block text-sm font-medium text-gray-900">電車・バス</span>
+                                                </label>
+                                                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
+                                                    <input type="radio" name="transportation" value="other" required className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                                    <span className="ml-3 block text-sm font-medium text-gray-900">その他 (徒歩・自転車など)</span>
+                                                </label>
+                                            </div>
+                                        </div>
 
-                                <div className="space-y-3">
-                                    <label className="flex items-start p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/50">
-                                        <div className="flex items-center h-5">
-                                            <input type="checkbox" name="pickup_needed" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                        <div className="space-y-3">
+                                            <label className="flex items-start p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/50">
+                                                <div className="flex items-center h-5">
+                                                    <input type="checkbox" name="pickup_needed" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                                </div>
+                                                <div className="ml-3 text-sm">
+                                                    <span className="font-bold text-gray-900">送迎を希望する</span>
+                                                    <p className="text-gray-500 mt-1 text-xs">駅などからの送迎が必要な場合はチェックを入れてください。</p>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div className="ml-3 text-sm">
-                                            <span className="font-bold text-gray-900">送迎を希望する</span>
-                                            <p className="text-gray-500 mt-1 text-xs">東戸塚駅からの送迎が必要な場合はチェックを入れてください。</p>
-                                        </div>
-                                    </label>
-                                </div>
+                                    </>
+                                )}
 
                                 {error && (
                                     <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium">
