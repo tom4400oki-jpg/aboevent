@@ -68,10 +68,10 @@ export default async function ReportsPage() {
                                     <time dateTime={report.created_at}>
                                         {format(new Date(report.created_at), 'yyyy.MM.dd', { locale: ja })}
                                     </time>
-                                    {report.events && (
+                                    {report.events && report.events.length > 0 && (
                                         <>
                                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span className="text-indigo-600 uppercase tracking-wider">{report.events.title}</span>
+                                            <span className="text-indigo-600 uppercase tracking-wider">{report.events[0].title}</span>
                                         </>
                                     )}
                                 </div>
