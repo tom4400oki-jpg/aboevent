@@ -34,6 +34,9 @@ export const metadata: Metadata = {
         description: '初心者・お一人様大歓迎！横浜・戸塚を中心に活動する世界一ゆるい社会人スポーツサークルです。',
         images: ['https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80'],
     },
+    verification: {
+        google: 'HHrQaKG5M1YlkTiB6U_T1AYJsdcdeCVlNf7ZWC_sYMA',
+    },
 }
 
 export default async function RootLayout({

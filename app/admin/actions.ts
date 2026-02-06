@@ -401,7 +401,7 @@ export async function geocodeAddress(address: string) {
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'aboevent-admin-app'
+                'User-Agent': 'funny-spo-admin-app'
             }
         })
         const data = await response.json()

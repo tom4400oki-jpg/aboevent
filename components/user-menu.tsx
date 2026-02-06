@@ -6,7 +6,7 @@ import { signOut } from '@/app/auth/actions'
 
 interface UserMenuProps {
     email?: string
-    role: 'admin' | 'moderator' | 'user'
+    role: 'admin' | 'moderator' | 'user' | 'lead' | 'member'
 }
 
 export default function UserMenu({ email, role }: UserMenuProps) {
