@@ -2,8 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-
-const ADMIN_EMAIL = 'tom4400oki@gmail.com'
+import { getAdminProfile } from '@/utils/admin'
 
 export async function sendMessage(content: string, receiverId?: string) {
     const supabase = await createClient()
@@ -15,15 +14,8 @@ export async function sendMessage(content: string, receiverId?: string) {
 
     // If no receiverId provided (from User POV), find Admin ID
     if (!targetId) {
-        // Find admin user ID securely (assuming profiles table has email or we can search auth)
-        // Since we can't query auth.users directly from client, we rely on profiles table or known ID.
-        // For MVP, we will query the public.profiles table if it syncs email.
-        // Previously we ensured profiles has email.
-        const { data: adminProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', ADMIN_EMAIL)
-            .single()
+        // DBからadminロールのユーザーを取得
+        const adminProfile = await getAdminProfile()
 
         if (!adminProfile) return { error: 'Admin not found' }
         targetId = adminProfile.id
@@ -44,3 +36,4 @@ export async function sendMessage(content: string, receiverId?: string) {
     revalidatePath(`/admin/messages`)
     return { success: true }
 }
+

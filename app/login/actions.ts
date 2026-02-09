@@ -39,3 +39,26 @@ export async function signup(formData: FormData) {
     revalidatePath('/', 'layout')
     redirect('/')
 }
+
+export async function signInWithGoogle() {
+    const supabase = await createClient()
+
+    // 環境変数からサイトURLを取得（本番/開発両方対応）
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${siteUrl}/auth/callback`,
+        },
+    })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    if (data.url) {
+        redirect(data.url)
+    }
+}
+

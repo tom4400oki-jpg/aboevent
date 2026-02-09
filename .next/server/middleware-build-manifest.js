@@ -1,33 +1,22 @@
-self.__BUILD_MANIFEST = {
+globalThis.__BUILD_MANIFEST = {
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
   "polyfillFiles": [
-    "static/chunks/polyfills.js"
+    "static/chunks/a6dad97d9634a72d.js"
   ],
-  "devFiles": [
-    "static/chunks/react-refresh.js"
-  ],
-  "ampDevFiles": [],
   "lowPriorityFiles": [],
   "rootMainFiles": [
-    "static/chunks/webpack.js",
-    "static/chunks/main-app.js"
-  ],
-  "rootMainFilesTree": {},
-  "pages": {
-    "/_app": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/_app.js"
-    ],
-    "/_error": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/_error.js"
-    ]
-  },
-  "ampFirstPages": []
+    "static/chunks/d250d7f6f0a8c325.js",
+    "static/chunks/37a97314f1b17b22.js",
+    "static/chunks/fe586add4e1c6347.js",
+    "static/chunks/00c4b5c9836ed5f8.js",
+    "static/chunks/fb1b0b9da3f03023.js",
+    "static/chunks/turbopack-407402b6fb83a19f.js"
+  ]
 };
-self.__BUILD_MANIFEST.lowPriorityFiles = [
+globalThis.__BUILD_MANIFEST.lowPriorityFiles = [
 "/static/" + process.env.__NEXT_BUILD_ID + "/_buildManifest.js",
-,"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js",
-
+"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js"
 ];

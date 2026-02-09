@@ -63,9 +63,8 @@ export default async function EditEventPage({
 
                 <EventLocationFields
                     initialLocation={event.location || ''}
+                    initialAddress={event.address || ''}
                     initialNearestStation={event.nearest_station || ''}
-                    initialLatitude={event.latitude}
-                    initialLongitude={event.longitude}
                 />
 
                 <div className="grid grid-cols-2 gap-4 items-center">

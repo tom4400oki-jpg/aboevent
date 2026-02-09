@@ -29,6 +29,7 @@ export async function createEvent(formData: FormData) {
     const end_at = `${event_date}T${end_time}:00+09:00`
 
     const location = formData.get('location') as string
+    const address = formData.get('address') as string
     const price = formData.get('price') ? parseInt(formData.get('price') as string) : 0
     const capacity = formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 10
     const category = formData.get('category') as string
@@ -47,6 +48,7 @@ export async function createEvent(formData: FormData) {
         start_at,
         end_at,
         location,
+        address,
         price,
         capacity,
         category,
@@ -89,6 +91,7 @@ export async function updateEvent(formData: FormData) {
     const end_at = `${event_date}T${end_time}:00+09:00`
 
     const location = formData.get('location') as string
+    const address = formData.get('address') as string
     const price = formData.get('price') ? parseInt(formData.get('price') as string) : 0
     const capacity = formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 10
     const category = formData.get('category') as string
@@ -118,6 +121,7 @@ export async function updateEvent(formData: FormData) {
             start_at,
             end_at,
             location,
+            address,
             price,
             capacity,
             category,

@@ -7,9 +7,10 @@ import { signOut } from '@/app/auth/actions'
 interface UserMenuProps {
     email?: string
     role: 'admin' | 'moderator' | 'user' | 'lead' | 'member'
+    avatarUrl?: string | null
 }
 
-export default function UserMenu({ email, role }: UserMenuProps) {
+export default function UserMenu({ email, role, avatarUrl }: UserMenuProps) {
     const [isOpen, setIsOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
 
@@ -30,12 +31,20 @@ export default function UserMenu({ email, role }: UserMenuProps) {
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-center h-10 w-10 number-full rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-indigo-600 transition-colors"
+                className="flex items-center justify-center h-10 w-10 number-full rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-indigo-600 transition-colors overflow-hidden ring-2 ring-transparent hover:ring-indigo-100"
                 aria-label="ユーザーメニュー"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
+                {avatarUrl ? (
+                    <img
+                        src={avatarUrl}
+                        alt="User Avatar"
+                        className="h-full w-full object-cover"
+                    />
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                )}
             </button>
 
             {isOpen && (
@@ -89,7 +98,7 @@ export default function UserMenu({ email, role }: UserMenuProps) {
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <span className="mr-3 text-orange-400 group-hover:text-orange-500">📝</span>
-                                    活動レポート
+                                    フォトログ
                                 </Link>
 
                                 {/* User List - ADMIN ONLY */}

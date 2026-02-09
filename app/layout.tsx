@@ -1,10 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const viewport: Viewport = {
+    themeColor: '#4f46e5',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+}
 
 export const metadata: Metadata = {
     title: {
@@ -16,7 +23,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'Funny-Spo | 横浜・戸塚の「笑って痩せる」社会人スポーツサークル',
         description: '初心者・お一人様大歓迎！横浜・戸塚を中心に活動する世界一ゆるい社会人スポーツサークルです。',
-        url: 'https://funny-spo.vercel.app', // URLは仮ですが設定しておきます
+        url: 'https://funny-spo.vercel.app',
         siteName: 'Funny-Spo',
         images: [
             {
@@ -48,7 +55,7 @@ export default async function RootLayout({
         <html lang="ja">
             <body className={`${inter.className} min-h-screen flex flex-col`}>
                 <Navbar />
-                <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+                <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {children}
                 </div>
                 <Footer />
@@ -56,3 +63,5 @@ export default async function RootLayout({
         </html>
     )
 }
+
+

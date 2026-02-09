@@ -1,12 +1,14 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { isAdmin } from '@/utils/admin'
 
 export default async function AdminMessagesPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    const hasAdminAccess = await isAdmin()
 
-    if (!user || user.email !== 'tom4400oki@gmail.com') {
+    if (!user || !hasAdminAccess) {
         redirect('/')
     }
 

@@ -1,6 +1,16 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { formatEventTimeRange, formatEventDate } from '@/utils/date'
+import { getRole } from '@/utils/admin'
+
+// 権限の階層定義（数値が大きいほど権限が高い）
+const ROLE_LEVELS: Record<string, number> = {
+    user: 1,
+    lead: 2,
+    member: 3,
+    moderator: 4,
+    admin: 5,
+}
 
 interface Event {
     id: string
@@ -11,14 +21,20 @@ interface Event {
     price: number | null
     category?: string
     image_url?: string | null
+    min_role?: string
 }
 
-export default async function EventList({ category }: { category?: string }) {
+export default async function EventList({ category, previewRole }: { category?: string, previewRole?: string }) {
     const supabase = await createClient()
+    const userRole = await getRole()
+
+    // 表示に使用する権限（プレビューモードの場合はpreviewRole、それ以外は実際の権限）
+    const effectiveRole = previewRole || userRole
+    const effectiveRoleLevel = ROLE_LEVELS[effectiveRole] || 1
 
     let query = supabase
         .from('events')
-        .select('id, title, start_at, end_at, location, price, category, image_url')
+        .select('id, title, start_at, end_at, location, price, category, image_url, min_role')
         .order('start_at', { ascending: true })
 
     if (category && category !== 'all') {
@@ -31,8 +47,12 @@ export default async function EventList({ category }: { category?: string }) {
         throw new Error(`Database Error: ${error.message}`)
     }
 
-    // Cast the data
-    const typedEvents = events as unknown as Event[]
+    // 権限に基づいてイベントをフィルタリング
+    const typedEvents = (events as unknown as Event[]).filter(event => {
+        const eventMinRole = event.min_role || 'user'
+        const eventMinLevel = ROLE_LEVELS[eventMinRole] || 1
+        return effectiveRoleLevel >= eventMinLevel
+    })
 
     if (!typedEvents || typedEvents.length === 0) {
         return (
@@ -71,6 +91,15 @@ export default async function EventList({ category }: { category?: string }) {
                             <div className={`absolute top-1 right-1 rounded-md px-2 py-0.5 text-[10px] font-bold shadow-sm backdrop-blur-sm ${isExpired ? 'bg-gray-500/90 text-white' : 'bg-white/90 text-indigo-600'}`}>
                                 {isExpired ? '受付終了' : '募集中'}
                             </div>
+                            {/* 権限バッジ（管理者のみ表示） */}
+                            {userRole === 'admin' && event.min_role && event.min_role !== 'user' && (
+                                <div className="absolute top-1 left-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold bg-orange-500/90 text-white">
+                                    {event.min_role === 'lead' ? 'アム出し以上' :
+                                        event.min_role === 'member' ? 'メンバー以上' :
+                                            event.min_role === 'moderator' ? '副管理者以上' :
+                                                event.min_role === 'admin' ? '管理者のみ' : ''}
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex flex-1 flex-col p-3">
@@ -97,3 +126,4 @@ export default async function EventList({ category }: { category?: string }) {
         </div>
     )
 }
+

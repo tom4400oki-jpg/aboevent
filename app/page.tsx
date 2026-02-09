@@ -1,37 +1,33 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Suspense } from 'react'
 import EventList from '@/components/event-list'
-import { createClient } from '@/utils/supabase/server'
-import EventMapWrapper from '@/components/event-map-wrapper'
+import AdminRoleFilter from '@/components/admin-role-filter'
+import { isAdmin } from '@/utils/admin'
 
 export const revalidate = 60
 
 export default async function Home({
     searchParams,
 }: {
-    searchParams: Promise<{ category?: string }>
+    searchParams: Promise<{ category?: string, previewRole?: string }>
 }) {
-    // Only await the search params to determine current filter state for UI
-    const { category } = await searchParams
-
-    const supabase = await createClient()
-    const { data: eventsWithCoords } = await supabase
-        .from('events')
-        .select('id, title, latitude, longitude, category')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .limit(100)
+    // 現在のフィルタ状態を取得
+    const { category, previewRole } = await searchParams
+    const isUserAdmin = await isAdmin()
 
     return (
         <main className="space-y-8">
-            {/* Hero Section */}
+            {/* ヒーローセクション */}
             <section className="relative rounded-3xl bg-indigo-900 overflow-hidden shadow-2xl">
-                {/* Background Image with Overlay */}
+                {/* 背景画像とオーバーレイ */}
                 <div className="absolute inset-0">
-                    <img
+                    <Image
                         src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80"
-                        alt="Sports background"
-                        className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+                        alt="スポーツを楽しむ人々の様子"
+                        fill
+                        className="object-cover opacity-60 mix-blend-overlay"
+                        priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-purple-900/80"></div>
                 </div>
@@ -49,41 +45,48 @@ export default async function Home({
             </section>
 
             <div className="space-y-6" id="events">
+                {/* 管理者用ロールフィルター */}
+                {isUserAdmin && (
+                    <Suspense fallback={null}>
+                        <AdminRoleFilter />
+                    </Suspense>
+                )}
+
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <h2 className="text-2xl font-bold text-gray-900">募集中イベント</h2>
 
-                    {/* Filters */}
+                    {/* フィルター */}
                     <div className="flex gap-2 text-sm font-medium overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto no-scrollbar">
                         <Link
-                            href="/"
+                            href={previewRole ? `/?previewRole=${previewRole}` : '/'}
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${!category || category === 'all' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
                             すべて
                         </Link>
                         <Link
-                            href="/?category=tennis"
+                            href={previewRole ? `/?category=tennis&previewRole=${previewRole}` : '/?category=tennis'}
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'tennis' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
-                            テニス 🎾
+                            テニス
                         </Link>
                         <Link
-                            href="/?category=futsal"
+                            href={previewRole ? `/?category=futsal&previewRole=${previewRole}` : '/?category=futsal'}
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'futsal' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
-                            フットサル ⚽
+                            フットサル
                         </Link>
                         <Link
-                            href="/?category=volleyball"
+                            href={previewRole ? `/?category=volleyball&previewRole=${previewRole}` : '/?category=volleyball'}
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'volleyball' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
-                            バレー 🏐
+                            バレー
                         </Link>
                         <Link
-                            href="/?category=other"
+                            href={previewRole ? `/?category=other&previewRole=${previewRole}` : '/?category=other'}
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'other' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
@@ -93,7 +96,7 @@ export default async function Home({
                 </div>
 
                 <Suspense
-                    key={category}
+                    key={`${category}-${previewRole}`}
                     fallback={
                         <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -106,27 +109,11 @@ export default async function Home({
                         </div>
                     }
                 >
-                    <EventList category={category} />
+                    <EventList category={category} previewRole={isUserAdmin ? previewRole : undefined} />
                 </Suspense>
-
-                {/* Map Section */}
-                <section className="mt-12 space-y-4">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 px-2">
-                        <span>📍</span> 開催地マップ
-                    </h2>
-                    <div className="rounded-2xl overflow-hidden ring-1 ring-gray-200">
-                        <EventMapWrapper
-                            events={(eventsWithCoords || []).map(e => ({
-                                id: e.id,
-                                title: e.title,
-                                latitude: e.latitude!,
-                                longitude: e.longitude!,
-                                category: e.category || undefined
-                            }))}
-                        />
-                    </div>
-                </section>
             </div>
         </main>
     )
 }
+
+

@@ -1,14 +1,22 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import UserMenu from '@/components/user-menu'
-import { getRole } from '@/utils/admin'
 
 export default async function Navbar() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const role = await getRole()
+    // ログイン中のユーザー情報を取得
+    const { data: profile } = user ? await supabase
+        .from('profiles')
+        .select('role, avatar_url')
+        .eq('id', user.id)
+        .single() : { data: null }
 
-    // Fetch unread messages count if user is logged in
+    const role = (profile?.role as 'admin' | 'moderator' | 'user' | 'lead' | 'member') || 'user'
+    const avatarUrl = profile?.avatar_url
+
+    // ログイン中のユーザーの未読メッセージ数を取得
     let unreadCount = 0
     if (user) {
         const { count } = await supabase
@@ -22,13 +30,16 @@ export default async function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
-            <div className="mx-auto flex h-26 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            {/* デスクトップ: 1行レイアウト */}
+            <div className="hidden sm:flex mx-auto h-20 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-2">
-                    <div className="h-20 w-[280px] sm:w-[320px] overflow-hidden">
-                        <img
+                    <div className="h-16 w-[280px] overflow-hidden relative">
+                        <Image
                             src="/logo.png"
-                            alt="Funny-Spo"
-                            className="h-full w-full object-cover object-center"
+                            alt="Funny-Spo - 横浜・戸塚の社会人スポーツサークル"
+                            fill
+                            className="object-cover object-center"
+                            priority
                         />
                     </div>
                 </Link>
@@ -38,36 +49,30 @@ export default async function Navbar() {
                         イベント
                     </Link>
                     <Link href="/reports" className="text-sm font-bold text-gray-600 hover:text-indigo-600 transition-colors">
-                        活動レポート
+                        フォトログ
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-6">
                     {user ? (
-                        <>
-                            <div className="flex items-center gap-3">
-                                {/* Message Icon */}
-                                <Link
-                                    href="/messages"
-                                    className="relative flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors text-gray-600 hover:text-indigo-600"
-                                    aria-label="メッセージ"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                                    </svg>
-
-                                    {unreadCount > 0 && (
-                                        <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                                        </span>
-                                    )}
-                                </Link>
-
-                                {/* User Menu */}
-                                <UserMenu email={user.email} role={role} />
-                            </div>
-                        </>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/messages"
+                                className="relative flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors text-gray-600 hover:text-indigo-600"
+                                aria-label="メッセージ"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                </svg>
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                                    </span>
+                                )}
+                            </Link>
+                            <UserMenu email={user.email} role={role} avatarUrl={avatarUrl} />
+                        </div>
                     ) : (
                         <Link
                             href="/login"
@@ -78,6 +83,65 @@ export default async function Navbar() {
                     )}
                 </div>
             </div>
+
+            {/* モバイル: 2段レイアウト */}
+            <div className="sm:hidden">
+                {/* 上段: ロゴ + ログイン/ユーザーメニュー */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-50">
+                    <Link href="/" className="flex items-center">
+                        <div className="h-12 w-[200px] overflow-hidden relative">
+                            <Image
+                                src="/logo.png"
+                                alt="Funny-Spo"
+                                fill
+                                className="object-cover object-center"
+                                priority
+                            />
+                        </div>
+                    </Link>
+
+                    <div className="flex items-center gap-2">
+                        {user ? (
+                            <>
+                                <Link
+                                    href="/messages"
+                                    className="relative flex items-center justify-center h-9 w-9 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                                    aria-label="メッセージ"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                    </svg>
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-1 right-1 flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                        </span>
+                                    )}
+                                </Link>
+                                <UserMenu email={user.email} role={role} avatarUrl={avatarUrl} />
+                            </>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                            >
+                                ログイン
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
+                {/* 下段: メニュー */}
+                <div className="flex items-center justify-center gap-8 px-4 py-2 bg-gray-50/50">
+                    <Link href="/" className="text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors">
+                        イベント
+                    </Link>
+                    <Link href="/reports" className="text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors">
+                        フォトログ
+                    </Link>
+                </div>
+            </div>
         </nav>
     )
 }
+

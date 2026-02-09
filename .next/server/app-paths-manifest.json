@@ -1,5 +1,22 @@
 {
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/events/[id]/edit/page": "app/admin/events/[id]/edit/page.js",
+  "/admin/events/new/page": "app/admin/events/new/page.js",
+  "/admin/messages/[userId]/page": "app/admin/messages/[userId]/page.js",
+  "/admin/messages/page": "app/admin/messages/page.js",
+  "/admin/reports/[id]/edit/page": "app/admin/reports/[id]/edit/page.js",
+  "/admin/reports/new/page": "app/admin/reports/new/page.js",
+  "/admin/reports/page": "app/admin/reports/page.js",
+  "/admin/users/[id]/edit/page": "app/admin/users/[id]/edit/page.js",
+  "/admin/users/page": "app/admin/users/page.js",
   "/bookings/page": "app/bookings/page.js",
+  "/events/[id]/page": "app/events/[id]/page.js",
+  "/login/page": "app/login/page.js",
+  "/messages/page": "app/messages/page.js",
+  "/mypage/page": "app/mypage/page.js",
   "/page": "app/page.js",
-  "/events/[id]/page": "app/events/[id]/page.js"
+  "/reports/[id]/page": "app/reports/[id]/page.js",
+  "/reports/page": "app/reports/page.js",
+  "/test/page": "app/test/page.js"
 }

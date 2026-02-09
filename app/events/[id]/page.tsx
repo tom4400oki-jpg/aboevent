@@ -117,8 +117,48 @@ export default async function EventPage({
             category: e.category
         }))
 
+        // 構造化データ (JSON-LD) の生成
+        const jsonLd = {
+            '@context': 'https://schema.org',
+            '@type': 'Event',
+            name: event.title,
+            startDate: event.start_at,
+            endDate: event.end_at,
+            eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+            eventStatus: 'https://schema.org/EventScheduled',
+            location: {
+                '@type': 'Place',
+                name: event.location,
+                address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: event.location, // 詳細な住所がない場合は場所名を使用
+                    addressLocality: '横浜市',    // デフォルト値として横浜市を設定
+                    addressRegion: '神奈川県',
+                    addressCountry: 'JP'
+                }
+            },
+            image: event.image_url ? [event.image_url] : [],
+            description: event.description || `${event.category || 'イベント'}の詳細です。`,
+            offers: {
+                '@type': 'Offer',
+                price: event.price || 0,
+                priceCurrency: 'JPY',
+                availability: isExpired ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+                url: `https://funny-spo.vercel.app/events/${event.id}`
+            },
+            organizer: {
+                '@type': 'Organization',
+                name: 'Funny-Spo',
+                url: 'https://funny-spo.vercel.app'
+            }
+        }
+
         return (
             <div className="min-h-screen bg-gray-50 pb-12">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
                 {/* Hero Section with Image */}
                 {/* ... existing code ... */}
                 <div className="relative h-[40vh] min-h-[300px] w-full bg-gray-900">

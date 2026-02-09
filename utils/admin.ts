@@ -33,11 +33,6 @@ export const getRole = cache(async (): Promise<'admin' | 'moderator' | 'member' 
 
     if (!user) return 'user'
 
-    // Safety fallback for Owner
-    if (user.email === 'tom4400oki@gmail.com') {
-        return 'admin'
-    }
-
     try {
         const { data, error } = await supabase
             .from('profiles')
@@ -61,9 +56,7 @@ export const canManageEvents = async () => {
 export const getAdminProfile = cache(async () => {
     const supabase = await createClient()
 
-    // Try to find the primary admin (hardcoded as fallback for safety)
-    const adminEmail = 'tom4400oki@gmail.com'
-
+    // 最初に登録されたadminロールのユーザーを取得
     const { data: admin } = await supabase
         .from('profiles')
         .select('id, email, full_name')
@@ -72,14 +65,6 @@ export const getAdminProfile = cache(async () => {
         .limit(1)
         .single()
 
-    if (admin) return admin
-
-    // Fallback if role is not set correctly yet
-    const { data: fallbackAdmin } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .eq('email', adminEmail)
-        .single()
-
-    return fallbackAdmin || null
+    return admin || null
 })
+

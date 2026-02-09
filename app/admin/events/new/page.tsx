@@ -63,9 +63,8 @@ export default async function NewEventPage({
 
                 <EventLocationFields
                     initialLocation={initialData?.location || ''}
+                    initialAddress={initialData?.address || ''}
                     initialNearestStation={initialData?.nearest_station || ''}
-                    initialLatitude={initialData?.latitude}
-                    initialLongitude={initialData?.longitude}
                 />
 
                 <div className="grid grid-cols-2 gap-4 items-center">

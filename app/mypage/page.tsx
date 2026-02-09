@@ -13,7 +13,7 @@ export default async function MyPage() {
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url, email')
+        .select('*')
         .eq('id', user.id)
         .single()
 
@@ -25,10 +25,16 @@ export default async function MyPage() {
                     <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">プロフィール設定</h2>
                     <ProfileForm
                         initialFullName={profile?.full_name ?? null}
+                        initialAvatarUrl={profile?.avatar_url ?? null}
                         email={profile?.email ?? user.email ?? ''}
+                        initialGender={profile?.gender ?? null}
+                        initialBirthdate={profile?.birthdate ?? null}
+                        initialResidence={profile?.residence ?? null}
+                        initialReferralSource={profile?.referral_source ?? null}
                     />
                 </div>
             </div>
         </main>
     )
 }
+
