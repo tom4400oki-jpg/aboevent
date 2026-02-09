@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { createClient } from '@/utils/supabase/server'
 
 // サイトのベースURL
-const BASE_URL = 'https://funny-spo.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://funny-spo.netlify.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient()
