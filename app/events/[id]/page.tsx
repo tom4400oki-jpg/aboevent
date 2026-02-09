@@ -139,17 +139,22 @@ export default async function EventPage({
             },
             image: event.image_url ? [event.image_url] : [],
             description: event.description || `${event.category || 'イベント'}の詳細です。`,
+            performer: {
+                '@type': 'Organization',
+                name: 'Funny-Spo'
+            },
             offers: {
                 '@type': 'Offer',
                 price: event.price || 0,
                 priceCurrency: 'JPY',
                 availability: isExpired ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
-                url: `https://funny-spo.vercel.app/events/${event.id}`
+                url: `https://funny-spo.netlify.app/events/${event.id}`,
+                validFrom: event.created_at || new Date().toISOString()
             },
             organizer: {
                 '@type': 'Organization',
                 name: 'Funny-Spo',
-                url: 'https://funny-spo.vercel.app'
+                url: 'https://funny-spo.netlify.app'
             }
         }
 
