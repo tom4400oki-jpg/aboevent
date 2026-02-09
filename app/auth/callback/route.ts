@@ -13,7 +13,9 @@ export async function GET(request: Request) {
 
         if (error) {
             console.error('Auth error:', error)
-            return NextResponse.redirect(`${origin}/login?error=auth_exchange_failed`)
+            const errorMessage = encodeURIComponent(error.message || 'Unknown error')
+            const errorDesc = encodeURIComponent(error.name || '')
+            return NextResponse.redirect(`${origin}/login?error=auth_exchange_failed&message=${errorMessage}&desc=${errorDesc}`)
         }
 
         if (sessionData?.user) {
