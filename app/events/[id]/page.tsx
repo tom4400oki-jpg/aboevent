@@ -52,6 +52,7 @@ interface Event {
     transportation_info: string | null
     latitude: number | null
     longitude: number | null
+    created_at: string // 追加
 }
 
 export default async function EventPage({
@@ -65,7 +66,7 @@ export default async function EventPage({
 
         const { data: eventData, error } = await supabase
             .from('events')
-            .select('id, title, start_at, end_at, location, nearest_station, price, description, image_url, category, ask_transportation, transportation_info')
+            .select('id, title, start_at, end_at, location, nearest_station, price, description, image_url, category, ask_transportation, transportation_info, created_at') // created_atを追加
             .eq('id', id)
             .single()
 
