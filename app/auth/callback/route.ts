@@ -12,14 +12,22 @@ export async function GET(request: Request) {
     const error = searchParams.get('error')
     const error_description = searchParams.get('error_description')
 
+    console.log('[Auth Debug] Callback route hit:', {
+        fullUrl: request.url,
+        origin,
+        hasCode: !!code,
+        hasError: !!error,
+    })
+
     // Googleからのコールバック自体にエラーが含まれている形跡がある場合
     if (error) {
-        console.error('Auth callback received error:', error, error_description)
+        console.error('[Auth Debug] Auth callback received error:', error, error_description)
         return NextResponse.redirect(`${origin}/login?error=auth_callback_error&message=${encodeURIComponent(error_description || error)}`)
     }
 
     if (code) {
         const supabase = await createClient()
+        console.log('[Auth Debug] Exchanging code for session...')
         const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
         if (sessionError) {

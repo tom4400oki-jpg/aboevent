@@ -47,11 +47,19 @@ export async function signInWithGoogle() {
     const host = headersList.get('host')
     const protocol = headersList.get('x-forwarded-proto') || 'http'
     const siteUrl = `${protocol}://${host}`
+    const redirectTo = `${siteUrl}/auth/callback`
+
+    console.log('[Auth Debug] signInWithGoogle called:', {
+        host,
+        protocol,
+        siteUrl,
+        redirectTo,
+    })
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${siteUrl}/auth/callback`,
+            redirectTo,
             queryParams: {
                 access_type: 'offline',
             },
