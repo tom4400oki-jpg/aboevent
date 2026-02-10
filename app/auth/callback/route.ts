@@ -11,8 +11,7 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
 
-    // Netlifyでは request.nextUrl.origin が内部URLになることがあるため
-    // x-forwarded-host を使って正しい公開URLを取得する
+    // 正しい公開URLを取得
     const forwardedHost = request.headers.get('x-forwarded-host')
     const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
     const origin = request.nextUrl.origin
@@ -34,11 +33,23 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${redirectBase}/login?error=no_code`)
     }
 
-    // ---- ここが重要 ----
-    // cookies() を使わず、request.cookies / response.cookies に直接読み書きする
-    // これにより NextResponse.redirect() のレスポンスにCookieが確実に含まれる
+    // Cookieを確実にブラウザに届けるため、200レスポンス(HTML)で返す
+    // (307リダイレクトだとNetlifyのCDNがSet-Cookieヘッダーを落とすことがある)
     const redirectUrl = `${redirectBase}${next}`
-    let response = NextResponse.redirect(redirectUrl)
+    let response = new NextResponse(
+        `<!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"><title>ログイン中...</title></head>
+        <body>
+            <p>ログイン処理中です...</p>
+            <script>window.location.href = "${redirectUrl}";</script>
+        </body>
+        </html>`,
+        {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' },
+        }
+    )
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,10 +60,7 @@ export async function GET(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    // request.cookies にも反映（後続の getAll で読めるように）
                     cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-                    // response を再構築して Cookie を載せる
-                    response = NextResponse.redirect(redirectUrl)
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
@@ -79,6 +87,10 @@ export async function GET(request: NextRequest) {
 
     const user = sessionData.user
     console.log('[GoogleLogin] Step5: ログイン成功', { userId: user.id, email: user.email })
+
+    // Cookie数を確認
+    const setCookieHeaders = response.headers.getSetCookie()
+    console.log('[GoogleLogin] Step5: セットされたCookie数:', setCookieHeaders.length)
 
     // プロフィール作成/更新
     try {
@@ -111,7 +123,6 @@ export async function GET(request: NextRequest) {
                 })
         }
 
-        // リファラルCookieをクリア
         if (referralCode) {
             response.cookies.set(REFERRAL_COOKIE_NAME, '', { path: '/', maxAge: 0 })
         }
@@ -119,6 +130,6 @@ export async function GET(request: NextRequest) {
         console.error('[GoogleLogin] Step5: プロフィール処理エラー（ログインは続行）', profileError)
     }
 
-    console.log('[GoogleLogin] Step6: リダイレクト', { redirectUrl })
+    console.log('[GoogleLogin] Step6: HTMLレスポンス返却（Cookieと共に）', { redirectUrl })
     return response
 }
