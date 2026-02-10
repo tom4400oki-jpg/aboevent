@@ -58,7 +58,6 @@ export async function signInWithGoogle() {
             redirectTo: `${siteUrl}/auth/callback`,
             queryParams: {
                 access_type: 'offline',
-                prompt: 'consent',
             },
         },
     })
