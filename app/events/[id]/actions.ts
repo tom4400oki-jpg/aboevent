@@ -3,6 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { getAdminProfile } from '@/utils/admin'
+import { cookies } from 'next/headers'
+
+const REFERRAL_COOKIE_NAME = 'referral_code'
 
 export async function bookEvent(formData: FormData) {
     const supabase = await createClient()
@@ -18,6 +21,12 @@ export async function bookEvent(formData: FormData) {
         return { error: '予約するにはログインが必要です。' }
     }
 
+    // リファラルCookieから紹介者IDを取得
+    const cookieStore = await cookies()
+    const referrerIdFromCookie = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
+    // 自分自身を紹介者にしない
+    const referrerId = (referrerIdFromCookie && referrerIdFromCookie !== user.id) ? referrerIdFromCookie : null
+
     // 2. Insert booking
     const { error: insertError } = await supabase
         .from('bookings')
@@ -25,7 +34,8 @@ export async function bookEvent(formData: FormData) {
             event_id: eventId,
             user_id: user.id,
             transportation,
-            pickup_needed
+            pickup_needed,
+            referrer_id: referrerId,
         })
 
     if (insertError) {

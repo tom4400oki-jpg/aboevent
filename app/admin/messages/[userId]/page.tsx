@@ -37,16 +37,18 @@ export default async function AdminChatPage({ params }: PageProps) {
     return (
         <main className="mx-auto max-w-4xl py-10 px-4 sm:px-6 lg:px-8 h-[calc(100vh-80px)]">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden h-full flex flex-col">
-                <div className="p-4 border-b border-gray-100 bg-orange-50 flex items-center gap-3">
-                    <a href="/admin/messages" className="text-gray-400 hover:text-gray-600 mr-2">
-                        ←
+                <div className="p-3 border-b border-gray-200 bg-[#6B8DB5] flex items-center gap-3">
+                    <a href="/admin/messages" className="text-white/80 hover:text-white mr-1 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
                     </a>
-                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                        U
+                    <div className="h-10 w-10 rounded-full bg-white/90 flex items-center justify-center text-gray-500 font-bold shadow-sm">
+                        {targetProfile?.full_name?.charAt(0) || 'U'}
                     </div>
                     <div>
-                        <h1 className="font-bold text-gray-900">{targetProfile?.full_name || 'User'}</h1>
-                        <p className="text-xs text-gray-500">{targetProfile?.email}</p>
+                        <h1 className="font-bold text-white">{targetProfile?.full_name || 'User'}</h1>
+                        <p className="text-[11px] text-white/70">{targetProfile?.email}</p>
                     </div>
                 </div>
 

@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin-client'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+
+const REFERRAL_COOKIE_NAME = 'referral_code'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
@@ -26,6 +29,10 @@ export async function GET(request: Request) {
             const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null
             const userEmail = user.email
 
+            // リファラルCookieから紹介者IDを取得
+            const cookieStore = await cookies()
+            const referralCode = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
+
             try {
                 // 既存のprofileを確認
                 const { data: existingProfile } = await supabaseAdmin
@@ -43,14 +50,15 @@ export async function GET(request: Request) {
                             .eq('id', user.id)
                     }
                 } else {
-                    // 新規profile作成
+                    // 新規profile作成（紹介者IDも記録）
                     await supabaseAdmin
                         .from('profiles')
                         .insert({
                             id: user.id,
                             email: userEmail,
                             full_name: googleName,
-                            role: 'user', // デフォルトロール
+                            role: 'user',
+                            referred_by: referralCode,
                         })
                 }
             } catch (profileError) {
@@ -58,12 +66,18 @@ export async function GET(request: Request) {
                 console.error('Profile creation error:', profileError)
             }
 
-            return NextResponse.redirect(`${origin}${next}`)
+            // リファラルCookieを削除（使用済み）
+            const response = NextResponse.redirect(`${origin}${next}`)
+            if (referralCode) {
+                response.cookies.set(REFERRAL_COOKIE_NAME, '', {
+                    path: '/',
+                    maxAge: 0,
+                })
+            }
+            return response
         }
     }
 
     // エラー時はログインページへリダイレクト
     return NextResponse.redirect(`${origin}/login?error=no_session_or_code`)
 }
-
-

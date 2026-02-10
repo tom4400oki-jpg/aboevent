@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin-client'
 import { formatEventTimeRange, formatEventDate } from '@/utils/date'
 import { getRole } from '@/utils/admin'
 
@@ -27,6 +28,7 @@ interface Event {
 export default async function EventList({ category, previewRole }: { category?: string, previewRole?: string }) {
     const supabase = await createClient()
     const userRole = await getRole()
+    const canManage = userRole === 'admin' || userRole === 'moderator'
 
     // 表示に使用する権限（プレビューモードの場合はpreviewRole、それ以外は実際の権限）
     const effectiveRole = previewRole || userRole
@@ -54,6 +56,22 @@ export default async function EventList({ category, previewRole }: { category?: 
         return effectiveRoleLevel >= eventMinLevel
     })
 
+    // 管理者・副管理者の場合、予約件数を一括取得
+    let bookingCounts: Record<string, number> = {}
+    if (canManage && typedEvents.length > 0) {
+        const adminClient = createAdminClient()
+        const eventIds = typedEvents.map(e => e.id)
+        const { data: bookings } = await adminClient
+            .from('bookings')
+            .select('event_id')
+            .in('event_id', eventIds)
+        if (bookings) {
+            for (const b of bookings) {
+                bookingCounts[b.event_id] = (bookingCounts[b.event_id] || 0) + 1
+            }
+        }
+    }
+
     if (!typedEvents || typedEvents.length === 0) {
         return (
             <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white p-6 text-center">
@@ -69,12 +87,8 @@ export default async function EventList({ category, previewRole }: { category?: 
             {typedEvents.map((event) => {
                 const isExpired = new Date(event.start_at) < new Date()
 
-                return (
-                    <Link
-                        key={event.id}
-                        href={`/events/${event.id}`}
-                        className={`group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:-translate-y-1 hover:shadow-md ${isExpired ? 'opacity-75' : ''}`}
-                    >
+                const cardContent = (
+                    <>
                         {/* Card Image */}
                         <div className="aspect-[16/9] w-full bg-gray-100 relative overflow-hidden">
                             {event.image_url ? (
@@ -120,6 +134,38 @@ export default async function EventList({ category, previewRole }: { category?: 
                                 </div>
                             </div>
                         </div>
+                    </>
+                )
+
+                if (canManage) {
+                    return (
+                        <div
+                            key={event.id}
+                            className={`group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:-translate-y-1 hover:shadow-md ${isExpired ? 'opacity-75' : ''}`}
+                        >
+                            <Link href={`/events/${event.id}`} className="flex flex-col flex-1">
+                                {cardContent}
+                            </Link>
+                            <div className="px-3 pb-3">
+                                <Link
+                                    href={`/admin/events/${event.id}/bookings`}
+                                    className="flex items-center justify-center gap-1.5 w-full rounded-md bg-indigo-50 px-2 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 border border-indigo-100 transition-colors"
+                                >
+                                    <span>📋</span>
+                                    <span>予約者 {bookingCounts[event.id] || 0}名</span>
+                                </Link>
+                            </div>
+                        </div>
+                    )
+                }
+
+                return (
+                    <Link
+                        key={event.id}
+                        href={`/events/${event.id}`}
+                        className={`group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:-translate-y-1 hover:shadow-md ${isExpired ? 'opacity-75' : ''}`}
+                    >
+                        {cardContent}
                     </Link>
                 )
             })}

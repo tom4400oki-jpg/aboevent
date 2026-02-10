@@ -32,13 +32,13 @@ export default async function MessagesPage() {
     return (
         <main className="mx-auto max-w-4xl py-10 px-4 sm:px-6 lg:px-8 h-[calc(100vh-80px)]">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden h-full flex flex-col">
-                <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+                <div className="p-3 border-b border-gray-200 bg-[#6B8DB5] flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-white/90 flex items-center justify-center text-gray-600 font-bold shadow-sm">
                         A
                     </div>
                     <div>
-                        <h1 className="font-bold text-gray-900">管理者</h1>
-                        <p className="text-xs text-gray-500">運営事務局</p>
+                        <h1 className="font-bold text-white">管理者</h1>
+                        <p className="text-[11px] text-white/70">運営事務局</p>
                     </div>
                 </div>
 

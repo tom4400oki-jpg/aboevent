@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin } from '@/utils/admin'
 import { createAdminClient } from '@/utils/supabase/admin-client'
+import CopyReferralButton from './copy-referral-button'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -101,6 +103,7 @@ export default async function AdminUsersPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end gap-2">
+                                            <CopyReferralButton userId={profile.id} />
                                             <Link
                                                 href={`/admin/users/${profile.id}/edit`}
                                                 className="text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-md transition-colors border border-gray-200"
