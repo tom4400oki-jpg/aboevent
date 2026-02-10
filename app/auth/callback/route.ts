@@ -20,16 +20,13 @@ export async function GET(request: NextRequest) {
         ? `${forwardedProto}://${forwardedHost}`
         : origin
 
-    console.log('[GoogleLogin] Step3: callbackに到着', { origin, forwardedHost, redirectBase, hasCode: !!code })
 
     // Google側からのエラー
     if (error) {
-        console.error('[GoogleLogin] Step3: Googleエラー', { error, errorDescription })
         return NextResponse.redirect(`${redirectBase}/login?error=${encodeURIComponent(errorDescription || error)}`)
     }
 
     if (!code) {
-        console.error('[GoogleLogin] Step3: codeなし')
         return NextResponse.redirect(`${redirectBase}/login?error=no_code`)
     }
 
@@ -69,28 +66,18 @@ export async function GET(request: NextRequest) {
         }
     )
 
-    console.log('[GoogleLogin] Step4: codeをセッションに交換中...')
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (sessionError) {
-        console.error('[GoogleLogin] Step4: セッション交換エラー', {
-            message: sessionError.message,
-            status: sessionError.status,
-        })
+        console.error('セッション交換エラー:', sessionError.message)
         return NextResponse.redirect(`${redirectBase}/login?error=${encodeURIComponent(sessionError.message)}`)
     }
 
     if (!sessionData?.user) {
-        console.error('[GoogleLogin] Step4: ユーザーデータなし')
         return NextResponse.redirect(`${redirectBase}/login?error=no_user`)
     }
 
     const user = sessionData.user
-    console.log('[GoogleLogin] Step5: ログイン成功', { userId: user.id, email: user.email })
-
-    // Cookie数を確認
-    const setCookieHeaders = response.headers.getSetCookie()
-    console.log('[GoogleLogin] Step5: セットされたCookie数:', setCookieHeaders.length)
 
     // プロフィール作成/更新
     try {
@@ -127,9 +114,8 @@ export async function GET(request: NextRequest) {
             response.cookies.set(REFERRAL_COOKIE_NAME, '', { path: '/', maxAge: 0 })
         }
     } catch (profileError) {
-        console.error('[GoogleLogin] Step5: プロフィール処理エラー（ログインは続行）', profileError)
+        console.error('プロフィール処理エラー:', profileError)
     }
 
-    console.log('[GoogleLogin] Step6: HTMLレスポンス返却（Cookieと共に）', { redirectUrl })
     return response
 }

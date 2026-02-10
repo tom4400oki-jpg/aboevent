@@ -26,7 +26,6 @@ export default function LoginPage() {
         const supabase = createClient()
         const redirectTo = `${window.location.origin}/auth/callback`
 
-        console.log('[GoogleLogin] Step1: ブラウザからGoogle認証開始', { redirectTo })
 
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -36,14 +35,13 @@ export default function LoginPage() {
         })
 
         if (error) {
-            console.error('[GoogleLogin] Step1: エラー', error.message)
+            console.error('Googleログインエラー:', error.message)
             setError(error.message)
             setLoading(false)
             return
         }
 
         if (data.url) {
-            console.log('[GoogleLogin] Step2: Google認証画面へ移動')
             window.location.href = data.url
         }
     }
