@@ -11,63 +11,15 @@ export async function updateSession(request: NextRequest) {
         },
     })
 
-    // リファラルパラメータをCookieに保存 & 訪問記録
+    // リファラルパラメータをCookieに保存
     const ref = request.nextUrl.searchParams.get('ref')
-    if (ref) {
-        let actualReferrerId = ref
-
-        // ref がUUIDでない場合（短縮コードの場合）、DBから検索
-        // UUIDの簡易チェック (36文字ハイフンあり)
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ref)
-
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-        if (!isUuid && supabaseUrl && serviceKey) {
-            try {
-                // 紹介コードからIDを検索
-                const lookupResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?referral_code=eq.${ref}&select=id`, {
-                    headers: {
-                        'apikey': serviceKey,
-                        'Authorization': `Bearer ${serviceKey}`,
-                    },
-                })
-                const lookupData = await lookupResponse.json()
-                if (Array.isArray(lookupData) && lookupData.length > 0) {
-                    actualReferrerId = lookupData[0].id
-                }
-            } catch (e) {
-                console.error('Referral lookup error:', e)
-            }
-        }
-
-        if (!request.cookies.get(REFERRAL_COOKIE_NAME)) {
-            response.cookies.set(REFERRAL_COOKIE_NAME, actualReferrerId, {
-                path: '/',
-                maxAge: REFERRAL_COOKIE_MAX_AGE,
-                httpOnly: true,
-                sameSite: 'lax',
-            })
-        }
-
-        // 訪問をSupabase REST APIで記録（非同期・ノンブロッキング）
-        if (supabaseUrl && serviceKey) {
-            fetch(`${supabaseUrl}/rest/v1/referral_visits`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': serviceKey,
-                    'Authorization': `Bearer ${serviceKey}`,
-                    'Prefer': 'return=minimal',
-                },
-                body: JSON.stringify({
-                    referrer_id: actualReferrerId,
-                    path: request.nextUrl.pathname,
-                }),
-            }).catch(() => {
-                // 訪問記録の失敗はサイレントに無視
-            })
-        }
+    if (ref && !request.cookies.get(REFERRAL_COOKIE_NAME)) {
+        response.cookies.set(REFERRAL_COOKIE_NAME, ref, {
+            path: '/',
+            maxAge: REFERRAL_COOKIE_MAX_AGE,
+            httpOnly: true,
+            sameSite: 'lax',
+        })
     }
 
     const supabase = createServerClient(
@@ -79,7 +31,7 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
                     response = NextResponse.next({
                         request: {
                             headers: request.headers,
@@ -88,25 +40,13 @@ export async function updateSession(request: NextRequest) {
                     cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
-
-                    // setAllが呼ばれた場合もreferral cookieを保持
-                    if (ref && !request.cookies.get(REFERRAL_COOKIE_NAME)) {
-                        response.cookies.set(REFERRAL_COOKIE_NAME, ref, {
-                            path: '/',
-                            maxAge: REFERRAL_COOKIE_MAX_AGE,
-                            httpOnly: true,
-                            sameSite: 'lax',
-                        })
-                    }
                 },
             },
         }
     )
 
-    // This will refresh session if needed - required for Server Components
-    // https://supabase.com/docs/guides/auth/server-side/nextjs
-    const { data: { user } } = await supabase.auth.getUser()
+    // セッションリフレッシュ（Server Componentsに必須）
+    await supabase.auth.getUser()
 
     return response
 }
-

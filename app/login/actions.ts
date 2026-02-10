@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { createClient } from '../../utils/supabase/server'
 
 export async function login(formData: FormData) {
@@ -43,33 +42,25 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
     const supabase = await createClient()
-    const headersList = await headers()
-    const host = headersList.get('host')
-    const protocol = headersList.get('x-forwarded-proto') || 'http'
-    const siteUrl = `${protocol}://${host}`
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
     const redirectTo = `${siteUrl}/auth/callback`
 
-    console.log('[Auth Debug] signInWithGoogle called:', {
-        host,
-        protocol,
-        siteUrl,
-        redirectTo,
-    })
+    console.log('[GoogleLogin] Step1: signInWithOAuth開始', { siteUrl, redirectTo })
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
             redirectTo,
-            queryParams: {
-                access_type: 'offline',
-            },
         },
     })
 
     if (error) {
-        console.error('Google Sign-in error:', error)
+        console.error('[GoogleLogin] Step1: OAuthエラー', error.message)
         return { error: error.message }
     }
+
+    console.log('[GoogleLogin] Step2: Google認証画面へリダイレクト', { url: data.url })
 
     if (data.url) {
         redirect(data.url)
