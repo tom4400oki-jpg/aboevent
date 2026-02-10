@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -53,6 +56,24 @@ export default async function RootLayout({
 }) {
     return (
         <html lang="ja">
+            <head>
+                {GA_MEASUREMENT_ID && (
+                    <>
+                        <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+                            strategy="afterInteractive"
+                        />
+                        <Script id="google-analytics" strategy="afterInteractive">
+                            {`
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
+                                gtag('config', '${GA_MEASUREMENT_ID}');
+                            `}
+                        </Script>
+                    </>
+                )}
+            </head>
             <body className={`${inter.className} min-h-screen flex flex-col`}>
                 <Navbar />
                 <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
