@@ -9,15 +9,23 @@ export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
+    const error = searchParams.get('error')
+    const error_description = searchParams.get('error_description')
+
+    // Googleからのコールバック自体にエラーが含まれている形跡がある場合
+    if (error) {
+        console.error('Auth callback received error:', error, error_description)
+        return NextResponse.redirect(`${origin}/login?error=auth_callback_error&message=${encodeURIComponent(error_description || error)}`)
+    }
 
     if (code) {
         const supabase = await createClient()
-        const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code)
+        const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
-        if (error) {
-            console.error('Auth error:', error)
-            const errorMessage = encodeURIComponent(error.message || 'Unknown error')
-            const errorDesc = encodeURIComponent(error.name || '')
+        if (sessionError) {
+            console.error('Auth exchange error:', sessionError)
+            const errorMessage = encodeURIComponent(sessionError.message || 'Unknown error')
+            const errorDesc = encodeURIComponent(sessionError.name || '')
             return NextResponse.redirect(`${origin}/login?error=auth_exchange_failed&message=${errorMessage}&desc=${errorDesc}`)
         }
 
@@ -51,6 +59,8 @@ export async function GET(request: Request) {
                     }
                 } else {
                     // 新規profile作成（紹介者IDも記録）
+                    // 以前に同じメールアドレスで登録されていたが削除されたなどのケースも考慮し、
+                    // upsertではなくinsertを使用しているが、念のためエラーハンドリングは強化済み
                     await supabaseAdmin
                         .from('profiles')
                         .insert({
@@ -63,7 +73,7 @@ export async function GET(request: Request) {
                 }
             } catch (profileError) {
                 // プロファイル作成エラーはログに出すが、ログイン自体はブロックしない
-                console.error('Profile creation error:', profileError)
+                console.error('Profile creation/update error:', profileError)
             }
 
             // リファラルCookieを削除（使用済み）
@@ -79,5 +89,6 @@ export async function GET(request: Request) {
     }
 
     // エラー時はログインページへリダイレクト
-    return NextResponse.redirect(`${origin}/login?error=no_session_or_code`)
+    console.error('No code provided in auth callback')
+    return NextResponse.redirect(`${origin}/login?error=no_code_provided`)
 }

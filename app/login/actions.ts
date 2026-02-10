@@ -43,17 +43,28 @@ export async function signup(formData: FormData) {
 export async function signInWithGoogle() {
     const supabase = await createClient()
 
-    // 環境変数からサイトURLを取得（本番/開発両方対応）
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    // 環境変数からサイトURLを取得
+    // 開発環境(localhost)と本番環境(Netlify)で適切なURLが設定されていることを前提とします
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+
+    if (!siteUrl) {
+        console.error('NEXT_PUBLIC_SITE_URL is not set')
+        return { error: 'Configuration error: Site URL not set' }
+    }
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
             redirectTo: `${siteUrl}/auth/callback`,
+            queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+            },
         },
     })
 
     if (error) {
+        console.error('Google Sign-in error:', error)
         return { error: error.message }
     }
 
