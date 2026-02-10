@@ -39,30 +39,3 @@ export async function signup(formData: FormData) {
     revalidatePath('/', 'layout')
     redirect('/')
 }
-
-export async function signInWithGoogle() {
-    const supabase = await createClient()
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-    const redirectTo = `${siteUrl}/auth/callback`
-
-    console.log('[GoogleLogin] Step1: signInWithOAuth開始', { siteUrl, redirectTo })
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo,
-        },
-    })
-
-    if (error) {
-        console.error('[GoogleLogin] Step1: OAuthエラー', error.message)
-        return { error: error.message }
-    }
-
-    console.log('[GoogleLogin] Step2: Google認証画面へリダイレクト', { url: data.url })
-
-    if (data.url) {
-        redirect(data.url)
-    }
-}

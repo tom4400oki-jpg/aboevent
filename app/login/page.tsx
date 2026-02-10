@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { login, signup, signInWithGoogle } from './actions'
+import { login, signup } from './actions'
+import { createClient } from '../../utils/supabase/client'
 import Link from 'next/link'
 
 export default function LoginPage() {
@@ -21,10 +22,29 @@ export default function LoginPage() {
     const handleGoogleLogin = async () => {
         setLoading(true)
         setError(null)
-        const res = await signInWithGoogle()
-        if (res?.error) {
-            setError(res.error)
+
+        const supabase = createClient()
+        const redirectTo = `${window.location.origin}/auth/callback`
+
+        console.log('[GoogleLogin] Step1: ブラウザからGoogle認証開始', { redirectTo })
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo,
+            },
+        })
+
+        if (error) {
+            console.error('[GoogleLogin] Step1: エラー', error.message)
+            setError(error.message)
             setLoading(false)
+            return
+        }
+
+        if (data.url) {
+            console.log('[GoogleLogin] Step2: Google認証画面へ移動')
+            window.location.href = data.url
         }
     }
 
@@ -170,4 +190,3 @@ export default function LoginPage() {
         </div>
     )
 }
-
