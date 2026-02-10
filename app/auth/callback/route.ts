@@ -1,90 +1,91 @@
-import { createClient } from '@/utils/supabase/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { createAdminClient } from '@/utils/supabase/admin-client'
-import { NextResponse } from 'next/server'
-import { cookies, headers } from 'next/headers'
+import { type NextRequest, NextResponse } from 'next/server'
 
 const REFERRAL_COOKIE_NAME = 'referral_code'
 
-export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
+export async function GET(request: NextRequest) {
+    const { searchParams } = request.nextUrl
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
 
-    // Netlifyでは origin が内部URLになることがある
+    // Netlifyでは request.nextUrl.origin が内部URLになることがあるため
     // x-forwarded-host を使って正しい公開URLを取得する
-    const headersList = await headers()
-    const forwardedHost = headersList.get('x-forwarded-host')
-    const forwardedProto = headersList.get('x-forwarded-proto') || 'https'
+    const forwardedHost = request.headers.get('x-forwarded-host')
+    const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
+    const origin = request.nextUrl.origin
     const isLocalEnv = process.env.NODE_ENV === 'development'
+    const redirectBase = (!isLocalEnv && forwardedHost)
+        ? `${forwardedProto}://${forwardedHost}`
+        : origin
 
-    // リダイレクト先の決定（Supabase公式推奨パターン）
-    let redirectBase: string
-    if (isLocalEnv) {
-        redirectBase = origin
-    } else if (forwardedHost) {
-        redirectBase = `${forwardedProto}://${forwardedHost}`
-    } else {
-        redirectBase = origin
-    }
+    console.log('[GoogleLogin] Step3: callbackに到着', { origin, forwardedHost, redirectBase, hasCode: !!code })
 
-    console.log('[GoogleLogin] Step3: callbackルートに到着', {
-        origin,
-        forwardedHost,
-        forwardedProto,
-        redirectBase,
-        hasCode: !!code,
-        hasError: !!error,
-        fullUrl: request.url,
-    })
-
-    // Google側からエラーが返ってきた場合
+    // Google側からのエラー
     if (error) {
-        console.error('[GoogleLogin] Step3: Google側エラー', { error, errorDescription })
-        return NextResponse.redirect(
-            `${redirectBase}/login?error=${encodeURIComponent(error)}&message=${encodeURIComponent(errorDescription || error)}`
-        )
+        console.error('[GoogleLogin] Step3: Googleエラー', { error, errorDescription })
+        return NextResponse.redirect(`${redirectBase}/login?error=${encodeURIComponent(errorDescription || error)}`)
     }
 
     if (!code) {
-        console.error('[GoogleLogin] Step3: codeが見つかりません')
+        console.error('[GoogleLogin] Step3: codeなし')
         return NextResponse.redirect(`${redirectBase}/login?error=no_code`)
     }
 
-    // codeをセッションに交換
-    const supabase = await createClient()
+    // ---- ここが重要 ----
+    // cookies() を使わず、request.cookies / response.cookies に直接読み書きする
+    // これにより NextResponse.redirect() のレスポンスにCookieが確実に含まれる
+    const redirectUrl = `${redirectBase}${next}`
+    let response = NextResponse.redirect(redirectUrl)
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return request.cookies.getAll()
+                },
+                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                    // request.cookies にも反映（後続の getAll で読めるように）
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+                    // response を再構築して Cookie を載せる
+                    response = NextResponse.redirect(redirectUrl)
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        response.cookies.set(name, value, options)
+                    )
+                },
+            },
+        }
+    )
+
     console.log('[GoogleLogin] Step4: codeをセッションに交換中...')
     const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (sessionError) {
         console.error('[GoogleLogin] Step4: セッション交換エラー', {
             message: sessionError.message,
-            name: sessionError.name,
             status: sessionError.status,
         })
-        return NextResponse.redirect(
-            `${redirectBase}/login?error=session_exchange_failed&message=${encodeURIComponent(sessionError.message)}`
-        )
+        return NextResponse.redirect(`${redirectBase}/login?error=${encodeURIComponent(sessionError.message)}`)
     }
 
     if (!sessionData?.user) {
-        console.error('[GoogleLogin] Step4: セッションデータにユーザーが含まれていません')
-        return NextResponse.redirect(`${redirectBase}/login?error=no_user_in_session`)
+        console.error('[GoogleLogin] Step4: ユーザーデータなし')
+        return NextResponse.redirect(`${redirectBase}/login?error=no_user`)
     }
 
     const user = sessionData.user
     console.log('[GoogleLogin] Step5: ログイン成功', { userId: user.id, email: user.email })
 
     // プロフィール作成/更新
-    const supabaseAdmin = createAdminClient()
-    const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null
-    const userEmail = user.email
-
-    const cookieStore = await cookies()
-    const referralCode = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
-
     try {
+        const supabaseAdmin = createAdminClient()
+        const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null
+        const referralCode = request.cookies.get(REFERRAL_COOKIE_NAME)?.value || null
+
         const { data: existingProfile } = await supabaseAdmin
             .from('profiles')
             .select('id, full_name')
@@ -97,30 +98,27 @@ export async function GET(request: Request) {
                     .from('profiles')
                     .update({ full_name: googleName })
                     .eq('id', user.id)
-                console.log('[GoogleLogin] Step5: プロフィール名を更新しました')
             }
         } else {
             await supabaseAdmin
                 .from('profiles')
                 .insert({
                     id: user.id,
-                    email: userEmail,
+                    email: user.email,
                     full_name: googleName,
                     role: 'user',
                     referred_by: referralCode,
                 })
-            console.log('[GoogleLogin] Step5: 新規プロフィールを作成しました')
+        }
+
+        // リファラルCookieをクリア
+        if (referralCode) {
+            response.cookies.set(REFERRAL_COOKIE_NAME, '', { path: '/', maxAge: 0 })
         }
     } catch (profileError) {
         console.error('[GoogleLogin] Step5: プロフィール処理エラー（ログインは続行）', profileError)
     }
 
-    // リダイレクト
-    const redirectUrl = `${redirectBase}${next}`
     console.log('[GoogleLogin] Step6: リダイレクト', { redirectUrl })
-    const response = NextResponse.redirect(redirectUrl)
-    if (referralCode) {
-        response.cookies.set(REFERRAL_COOKIE_NAME, '', { path: '/', maxAge: 0 })
-    }
     return response
 }
