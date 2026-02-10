@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin-client'
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 
 const REFERRAL_COOKIE_NAME = 'referral_code'
 
@@ -12,8 +12,28 @@ export async function GET(request: Request) {
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
 
+    // Netlifyでは origin が内部URLになることがある
+    // x-forwarded-host を使って正しい公開URLを取得する
+    const headersList = await headers()
+    const forwardedHost = headersList.get('x-forwarded-host')
+    const forwardedProto = headersList.get('x-forwarded-proto') || 'https'
+    const isLocalEnv = process.env.NODE_ENV === 'development'
+
+    // リダイレクト先の決定（Supabase公式推奨パターン）
+    let redirectBase: string
+    if (isLocalEnv) {
+        redirectBase = origin
+    } else if (forwardedHost) {
+        redirectBase = `${forwardedProto}://${forwardedHost}`
+    } else {
+        redirectBase = origin
+    }
+
     console.log('[GoogleLogin] Step3: callbackルートに到着', {
         origin,
+        forwardedHost,
+        forwardedProto,
+        redirectBase,
         hasCode: !!code,
         hasError: !!error,
         fullUrl: request.url,
@@ -23,13 +43,13 @@ export async function GET(request: Request) {
     if (error) {
         console.error('[GoogleLogin] Step3: Google側エラー', { error, errorDescription })
         return NextResponse.redirect(
-            `${origin}/login?error=${encodeURIComponent(error)}&message=${encodeURIComponent(errorDescription || error)}`
+            `${redirectBase}/login?error=${encodeURIComponent(error)}&message=${encodeURIComponent(errorDescription || error)}`
         )
     }
 
     if (!code) {
         console.error('[GoogleLogin] Step3: codeが見つかりません')
-        return NextResponse.redirect(`${origin}/login?error=no_code`)
+        return NextResponse.redirect(`${redirectBase}/login?error=no_code`)
     }
 
     // codeをセッションに交換
@@ -44,13 +64,13 @@ export async function GET(request: Request) {
             status: sessionError.status,
         })
         return NextResponse.redirect(
-            `${origin}/login?error=session_exchange_failed&message=${encodeURIComponent(sessionError.message)}`
+            `${redirectBase}/login?error=session_exchange_failed&message=${encodeURIComponent(sessionError.message)}`
         )
     }
 
     if (!sessionData?.user) {
         console.error('[GoogleLogin] Step4: セッションデータにユーザーが含まれていません')
-        return NextResponse.redirect(`${origin}/login?error=no_user_in_session`)
+        return NextResponse.redirect(`${redirectBase}/login?error=no_user_in_session`)
     }
 
     const user = sessionData.user
@@ -96,8 +116,9 @@ export async function GET(request: Request) {
     }
 
     // リダイレクト
-    console.log('[GoogleLogin] Step6: トップページへリダイレクト', { next })
-    const response = NextResponse.redirect(`${origin}${next}`)
+    const redirectUrl = `${redirectBase}${next}`
+    console.log('[GoogleLogin] Step6: リダイレクト', { redirectUrl })
+    const response = NextResponse.redirect(redirectUrl)
     if (referralCode) {
         response.cookies.set(REFERRAL_COOKIE_NAME, '', { path: '/', maxAge: 0 })
     }
