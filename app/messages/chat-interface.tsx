@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { sendMessage } from './actions'
+import Image from 'next/image'
+import { sendMessage, markMessagesAsRead } from './actions'
 
 interface Message {
     id: string
@@ -14,6 +15,11 @@ interface ChatInterfaceProps {
     initialMessages: Message[]
     currentUserId: string
     receiverId?: string
+    isAdminMode?: boolean
+    targetUser?: {
+        full_name: string | null
+        email: string | null
+    }
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -43,7 +49,7 @@ function formatTime(dateStr: string): string {
     })
 }
 
-export default function ChatInterface({ initialMessages, currentUserId, receiverId }: ChatInterfaceProps) {
+export default function ChatInterface({ initialMessages, currentUserId, receiverId, isAdminMode, targetUser }: ChatInterfaceProps) {
     const [input, setInput] = useState('')
     const [isSending, setIsSending] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
@@ -53,6 +59,14 @@ export default function ChatInterface({ initialMessages, currentUserId, receiver
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         }
     }, [initialMessages])
+
+    // Mark messages as read on mount
+    useEffect(() => {
+        const markRead = async () => {
+            await markMessagesAsRead()
+        }
+        markRead()
+    }, [])
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -112,9 +126,20 @@ export default function ChatInterface({ initialMessages, currentUserId, receiver
                                         {/* 相手側アイコン */}
                                         {!isMe && (
                                             <div className="flex-shrink-0 mr-2 mt-1">
-                                                <div className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center text-gray-500 text-xs font-bold shadow-sm">
-                                                    A
-                                                </div>
+                                                {isAdminMode ? (
+                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold shadow-sm border border-gray-100">
+                                                        {targetUser?.full_name?.charAt(0) || targetUser?.email?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-8 w-8 rounded-full bg-white/90 flex items-center justify-center overflow-hidden shadow-sm relative border border-gray-100">
+                                                        <Image
+                                                            src="/admin-icon.png"
+                                                            alt="Admin"
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
@@ -122,8 +147,8 @@ export default function ChatInterface({ initialMessages, currentUserId, receiver
                                             {/* バブル */}
                                             <div
                                                 className={`relative px-3 py-2 text-sm shadow-sm ${isMe
-                                                        ? 'bg-[#8CE349] text-gray-900 rounded-2xl rounded-tr-sm'
-                                                        : 'bg-white text-gray-900 rounded-2xl rounded-tl-sm'
+                                                    ? 'bg-[#8CE349] text-gray-900 rounded-2xl rounded-tr-sm'
+                                                    : 'bg-white text-gray-900 rounded-2xl rounded-tl-sm'
                                                     }`}
                                             >
                                                 <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>

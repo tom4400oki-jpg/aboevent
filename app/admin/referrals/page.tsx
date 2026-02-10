@@ -12,10 +12,10 @@ export default async function AdminReferralsPage() {
 
     const supabaseAdmin = createAdminClient()
 
-    // 全プロフィールを取得
+    // 全プロフィールを取得 (referral_codeを追加)
     const { data: profiles } = await supabaseAdmin
         .from('profiles')
-        .select('id, full_name, email, avatar_url, referred_by')
+        .select('id, full_name, email, avatar_url, referred_by, referral_code')
 
     // 全予約を取得（referrer_idがあるもの）
     const { data: bookingsWithReferrers } = await supabaseAdmin
@@ -45,15 +45,9 @@ export default async function AdminReferralsPage() {
 
     // 紹介サインアップ数をカウント
     const signupCounts: Record<string, number> = {}
-    const signupDetails: Record<string, { name: string; email: string }[]> = {}
     profiles.forEach(p => {
         if (p.referred_by) {
             signupCounts[p.referred_by] = (signupCounts[p.referred_by] || 0) + 1
-            if (!signupDetails[p.referred_by]) signupDetails[p.referred_by] = []
-            signupDetails[p.referred_by].push({
-                name: p.full_name || '(未設定)',
-                email: p.email || '',
-            })
         }
     })
 
@@ -127,7 +121,7 @@ export default async function AdminReferralsPage() {
                         <div className="text-4xl mb-3">📊</div>
                         <p className="text-gray-500 font-medium">まだ紹介実績はありません</p>
                         <p className="text-gray-400 text-sm mt-2">
-                            ユーザーに <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{siteUrl}/?ref=ユーザーID</code> を共有してもらいましょう
+                            ユーザーに <code className="bg-gray-100 px-2 py-0.5 rounded text-xs">{siteUrl}/?ref=紹介コード</code> を共有してもらいましょう
                         </p>
                     </div>
                 ) : (
@@ -136,17 +130,14 @@ export default async function AdminReferralsPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">紹介者</th>
+                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">紹介コード</th>
                                     <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">閲覧</th>
                                     <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">登録</th>
                                     <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">予約</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">CVR</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {referrers.map(referrer => {
-                                    const cvr = referrer.visitCount > 0
-                                        ? ((referrer.signupCount / referrer.visitCount) * 100).toFixed(1)
-                                        : '-'
                                     return (
                                         <tr key={referrer.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-5 py-4 whitespace-nowrap">
@@ -167,6 +158,11 @@ export default async function AdminReferralsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap text-center">
+                                                <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded text-gray-600">
+                                                    {referrer.profile?.referral_code || '-'}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-4 whitespace-nowrap text-center">
                                                 <span className="text-lg font-black text-blue-600">{referrer.visitCount}</span>
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap text-center">
@@ -174,11 +170,6 @@ export default async function AdminReferralsPage() {
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap text-center">
                                                 <span className="text-lg font-black text-green-600">{referrer.bookingCount}</span>
-                                            </td>
-                                            <td className="px-5 py-4 whitespace-nowrap text-center">
-                                                <span className="text-sm font-bold text-gray-500">
-                                                    {cvr === '-' ? '-' : `${cvr}%`}
-                                                </span>
                                             </td>
                                         </tr>
                                     )
@@ -193,7 +184,7 @@ export default async function AdminReferralsPage() {
             <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900">全ユーザーの紹介リンク</h2>
-                    <p className="text-xs text-gray-500 mt-1">各ユーザーに対応する紹介URLです</p>
+                    <p className="text-xs text-gray-500 mt-1">各ユーザーに対応する短縮紹介URLです</p>
                 </div>
                 <div className="divide-y divide-gray-50 max-h-96 overflow-y-auto">
                     {profiles
@@ -205,7 +196,7 @@ export default async function AdminReferralsPage() {
                                     {profile.full_name}
                                 </span>
                                 <div className="text-xs text-gray-400 font-mono truncate ml-4 max-w-[300px]">
-                                    {siteUrl}/?ref={profile.id}
+                                    {siteUrl}/?ref={profile.referral_code || profile.id}
                                 </div>
                             </div>
                         ))}

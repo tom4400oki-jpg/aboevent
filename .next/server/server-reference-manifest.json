@@ -8,6 +8,12 @@
           "exportedName": "signOut",
           "filename": "app/auth/actions.ts"
         },
+        "app/admin/events/[id]/bookings/page": {
+          "moduleId": 67311,
+          "async": false,
+          "exportedName": "signOut",
+          "filename": "app/auth/actions.ts"
+        },
         "app/admin/events/[id]/edit/page": {
           "moduleId": 81693,
           "async": false,
@@ -32,6 +38,12 @@
           "exportedName": "signOut",
           "filename": "app/auth/actions.ts"
         },
+        "app/admin/referrals/page": {
+          "moduleId": 42351,
+          "async": false,
+          "exportedName": "signOut",
+          "filename": "app/auth/actions.ts"
+        },
         "app/admin/reports/[id]/edit/page": {
           "moduleId": 12129,
           "async": false,
@@ -50,6 +62,12 @@
           "exportedName": "signOut",
           "filename": "app/auth/actions.ts"
         },
+        "app/admin/settings/page": {
+          "moduleId": 45903,
+          "async": false,
+          "exportedName": "signOut",
+          "filename": "app/auth/actions.ts"
+        },
         "app/admin/users/[id]/edit/page": {
           "moduleId": 6619,
           "async": false,
@@ -57,7 +75,7 @@
           "filename": "app/auth/actions.ts"
         },
         "app/admin/users/page": {
-          "moduleId": 89536,
+          "moduleId": 13580,
           "async": false,
           "exportedName": "signOut",
           "filename": "app/auth/actions.ts"
@@ -119,13 +137,16 @@
       },
       "layer": {
         "app/_not-found/page": "action-browser",
+        "app/admin/events/[id]/bookings/page": "action-browser",
         "app/admin/events/[id]/edit/page": "action-browser",
         "app/admin/events/new/page": "action-browser",
         "app/admin/messages/[userId]/page": "action-browser",
         "app/admin/messages/page": "action-browser",
+        "app/admin/referrals/page": "action-browser",
         "app/admin/reports/[id]/edit/page": "action-browser",
         "app/admin/reports/new/page": "action-browser",
         "app/admin/reports/page": "action-browser",
+        "app/admin/settings/page": "action-browser",
         "app/admin/users/[id]/edit/page": "action-browser",
         "app/admin/users/page": "action-browser",
         "app/bookings/page": "action-browser",
@@ -476,8 +497,8 @@
         }
       },
       "layer": {
-        "app/admin/events/[id]/edit/page": "action-browser",
-        "app/admin/events/new/page": "action-browser",
+        "app/admin/events/[id]/edit/page": "rsc",
+        "app/admin/events/new/page": "rsc",
         "app/admin/reports/[id]/edit/page": "rsc",
         "app/admin/reports/new/page": "rsc",
         "app/admin/users/[id]/edit/page": "rsc"
@@ -506,6 +527,36 @@
       },
       "filename": "app/messages/actions.ts",
       "exportedName": "sendMessage"
+    },
+    "40e68023e173dba5d6bed4168ff13502fc4d0662f6": {
+      "workers": {
+        "app/admin/settings/page": {
+          "moduleId": 45903,
+          "async": false,
+          "exportedName": "setImpersonationTarget",
+          "filename": "app/admin/settings/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/settings/page": "action-browser"
+      },
+      "filename": "app/admin/settings/actions.ts",
+      "exportedName": "setImpersonationTarget"
+    },
+    "408cc989acd7070a45ab1625bf9280b1b4b808c7b9": {
+      "workers": {
+        "app/admin/users/page": {
+          "moduleId": 13580,
+          "async": false,
+          "exportedName": "impersonateUser",
+          "filename": "app/admin/users/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/users/page": "action-browser"
+      },
+      "filename": "app/admin/users/actions.ts",
+      "exportedName": "impersonateUser"
     },
     "40b2aa7f546dbecfc46a95451adbb1e16a51625293": {
       "workers": {
@@ -567,6 +618,21 @@
       "filename": "app/login/actions.ts",
       "exportedName": "signup"
     },
+    "00f072d6c91e80e9bfaad14d524866d1f69f1820e4": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": 94710,
+          "async": false,
+          "exportedName": "signInWithGoogle",
+          "filename": "app/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser"
+      },
+      "filename": "app/login/actions.ts",
+      "exportedName": "signInWithGoogle"
+    },
     "409f11b7028427d8c76cb1b5219b41606156fa9382": {
       "workers": {
         "app/mypage/page": {
@@ -581,6 +647,21 @@
       },
       "filename": "app/mypage/actions.ts",
       "exportedName": "updateProfile"
+    },
+    "402ade53532c3fce28f0ccb2ceefafbb9bc867f39d": {
+      "workers": {
+        "app/mypage/page": {
+          "moduleId": 66098,
+          "async": false,
+          "exportedName": "uploadAvatar",
+          "filename": "app/mypage/actions.ts"
+        }
+      },
+      "layer": {
+        "app/mypage/page": "action-browser"
+      },
+      "filename": "app/mypage/actions.ts",
+      "exportedName": "uploadAvatar"
     }
   },
   "edge": {},

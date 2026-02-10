@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { isAdmin } from '@/utils/admin'
 import { createAdminClient } from '@/utils/supabase/admin-client'
 import CopyReferralButton from './copy-referral-button'
+import ImpersonateButton from './impersonate-button'
 
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +20,7 @@ export default async function AdminUsersPage() {
     const supabaseAdmin = createAdminClient()
     const { data: profiles, error } = await supabaseAdmin
         .from('profiles')
-        .select('id, full_name, email, avatar_url, role, updated_at')
+        .select('id, full_name, email, avatar_url, role, updated_at, referral_code')
         .order('updated_at', { ascending: false })
 
     if (error) {
@@ -103,7 +104,14 @@ export default async function AdminUsersPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex justify-end gap-2">
-                                            <CopyReferralButton userId={profile.id} />
+                                            <ImpersonateButton
+                                                userId={profile.id}
+                                                userName={profile.full_name}
+                                            />
+                                            <CopyReferralButton
+                                                userId={profile.id}
+                                                code={profile.referral_code}
+                                            />
                                             <Link
                                                 href={`/admin/users/${profile.id}/edit`}
                                                 className="text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-md transition-colors border border-gray-200"

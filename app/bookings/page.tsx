@@ -2,18 +2,38 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CancelButton from '@/components/cancel-button'
+import { getEffectiveUser } from '@/utils/admin'
+
+import { createAdminClient } from '@/utils/supabase/admin-client'
 
 export default async function BookingsPage() {
     const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getEffectiveUser()
 
     if (!user) {
         redirect('/login')
     }
 
+    // Check for impersonation to bypass RLS
+    const { data: { user: realUser } } = await supabase.auth.getUser()
+    let dbClient = supabase
+
+    if (realUser && user.id !== realUser.id) {
+        // Fetch ACTUAL user's role, not the effective user's role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', realUser.id)
+            .single()
+
+        const role = profile?.role
+        if (role === 'admin' || role === 'moderator') {
+            dbClient = createAdminClient()
+        }
+    }
+
     // Fetch user's bookings with event details
-    const { data: bookings } = await supabase
+    const { data: bookings } = await dbClient
         .from('bookings')
         .select(`
             id,

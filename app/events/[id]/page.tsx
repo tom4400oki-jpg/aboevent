@@ -3,7 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import ReserveButton from './reserve-button'
 import Link from 'next/link'
 import EventGallery from '@/components/event-gallery'
-import { canManageEvents } from '@/utils/admin'
+import { canManageEvents, getEffectiveUser } from '@/utils/admin'
+import { createAdminClient } from '@/utils/supabase/admin-client'
 import { formatEventDate, formatEventTimeRange } from '@/utils/date'
 
 import { Metadata } from 'next'
@@ -77,12 +78,33 @@ export default async function EventPage({
 
         const event = eventData as Event
 
-        const { data: { user } } = await supabase.auth.getUser()
+
+        // ... (existing imports)
+
+        const user = await getEffectiveUser()
         const isLoggedIn = !!user
 
         let isBooked = false
         if (user) {
-            const { data: booking } = await supabase
+            // Check if we need admin privileges to see the booking (impersonation)
+            const { data: { user: realUser } } = await supabase.auth.getUser()
+            let dbClient = supabase
+
+            if (realUser && user.id !== realUser.id) {
+                // Check ACTUAL user's role for RLS bypass
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', realUser.id)
+                    .single()
+
+                const role = profile?.role
+                if (role === 'admin' || role === 'moderator') {
+                    dbClient = createAdminClient()
+                }
+            }
+
+            const { data: booking } = await dbClient
                 .from('bookings')
                 .select('id')
                 .eq('event_id', id)

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin-client'
 import { formatEventTimeRange, formatEventDate } from '@/utils/date'
-import { getRole } from '@/utils/admin'
+import { getEffectiveRole, canManageEvents, getRole, getEffectiveUser } from '@/utils/admin'
 
 // 権限の階層定義（数値が大きいほど権限が高い）
 const ROLE_LEVELS: Record<string, number> = {
@@ -25,14 +25,13 @@ interface Event {
     min_role?: string
 }
 
-export default async function EventList({ category, previewRole }: { category?: string, previewRole?: string }) {
+export default async function EventList({ category }: { category?: string }) {
     const supabase = await createClient()
-    const userRole = await getRole()
-    const canManage = userRole === 'admin' || userRole === 'moderator'
-
-    // 表示に使用する権限（プレビューモードの場合はpreviewRole、それ以外は実際の権限）
-    const effectiveRole = previewRole || userRole
+    const actualRole = await getRole()
+    const canManage = await canManageEvents()
+    const effectiveRole = await getEffectiveRole()
     const effectiveRoleLevel = ROLE_LEVELS[effectiveRole] || 1
+
 
     let query = supabase
         .from('events')
@@ -106,7 +105,7 @@ export default async function EventList({ category, previewRole }: { category?: 
                                 {isExpired ? '受付終了' : '募集中'}
                             </div>
                             {/* 権限バッジ（管理者のみ表示） */}
-                            {userRole === 'admin' && event.min_role && event.min_role !== 'user' && (
+                            {actualRole === 'admin' && event.min_role && event.min_role !== 'user' && (
                                 <div className="absolute top-1 left-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold bg-orange-500/90 text-white">
                                     {event.min_role === 'lead' ? 'アム出し以上' :
                                         event.min_role === 'member' ? 'メンバー以上' :
@@ -115,6 +114,7 @@ export default async function EventList({ category, previewRole }: { category?: 
                                 </div>
                             )}
                         </div>
+
 
                         <div className="flex flex-1 flex-col p-3">
                             <div className="mb-1 text-xs font-semibold text-indigo-600">

@@ -14,8 +14,35 @@ export async function updateSession(request: NextRequest) {
     // リファラルパラメータをCookieに保存 & 訪問記録
     const ref = request.nextUrl.searchParams.get('ref')
     if (ref) {
+        let actualReferrerId = ref
+
+        // ref がUUIDでない場合（短縮コードの場合）、DBから検索
+        // UUIDの簡易チェック (36文字ハイフンあり)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ref)
+
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+        if (!isUuid && supabaseUrl && serviceKey) {
+            try {
+                // 紹介コードからIDを検索
+                const lookupResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?referral_code=eq.${ref}&select=id`, {
+                    headers: {
+                        'apikey': serviceKey,
+                        'Authorization': `Bearer ${serviceKey}`,
+                    },
+                })
+                const lookupData = await lookupResponse.json()
+                if (Array.isArray(lookupData) && lookupData.length > 0) {
+                    actualReferrerId = lookupData[0].id
+                }
+            } catch (e) {
+                console.error('Referral lookup error:', e)
+            }
+        }
+
         if (!request.cookies.get(REFERRAL_COOKIE_NAME)) {
-            response.cookies.set(REFERRAL_COOKIE_NAME, ref, {
+            response.cookies.set(REFERRAL_COOKIE_NAME, actualReferrerId, {
                 path: '/',
                 maxAge: REFERRAL_COOKIE_MAX_AGE,
                 httpOnly: true,
@@ -24,8 +51,6 @@ export async function updateSession(request: NextRequest) {
         }
 
         // 訪問をSupabase REST APIで記録（非同期・ノンブロッキング）
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
         if (supabaseUrl && serviceKey) {
             fetch(`${supabaseUrl}/rest/v1/referral_visits`, {
                 method: 'POST',
@@ -36,7 +61,7 @@ export async function updateSession(request: NextRequest) {
                     'Prefer': 'return=minimal',
                 },
                 body: JSON.stringify({
-                    referrer_id: ref,
+                    referrer_id: actualReferrerId,
                     path: request.nextUrl.pathname,
                 }),
             }).catch(() => {

@@ -56,6 +56,8 @@ export default async function AdminChatPage({ params }: PageProps) {
                     initialMessages={messages || []}
                     currentUserId={user.id}
                     receiverId={userId}
+                    isAdminMode={true}
+                    targetUser={targetProfile || undefined}
                 />
             </div>
         </main>

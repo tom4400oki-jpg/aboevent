@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin-client'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin } from '@/utils/admin'
@@ -12,52 +13,101 @@ export default async function AdminMessagesPage() {
         redirect('/')
     }
 
-    // Get all messages sent TO admin (to find users who messaged)
-    // Also get messages sent BY admin (to see who I talked to)
-    // This is a bit complex in SQL, typically we want "Conversations".
-    // For MVP, fetch all messages related to Admin and group by 'other_party' in JS.
-    const { data: messages } = await supabase
+    // 1. Fetch ALL messages using Admin Client to verify system-wide conversations
+    const adminSupabase = createAdminClient()
+    const { data: messages } = await adminSupabase
         .from('messages')
-        .select(`
-            *,
-            sender:sender_id(full_name, email, avatar_url),
-            receiver:receiver_id(full_name, email, avatar_url)
-        `)
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .select('*')
         .order('created_at', { ascending: false })
 
     if (!messages) return <div>Loading...</div>
 
-    // Group by User and calculate metadata
-    const conversationsMap = new Map()
+    // 2. Identify all unique users involved
+    const userIds = new Set<string>()
+    messages.forEach(msg => {
+        userIds.add(msg.sender_id)
+        userIds.add(msg.receiver_id)
+    })
 
-    messages.forEach((msg: any) => {
-        const isMeSender = msg.sender_id === user.id
-        const otherUserId = isMeSender ? msg.receiver_id : msg.sender_id
-        const otherUser = isMeSender ? msg.receiver : msg.sender
-        const isUnread = !msg.is_read && msg.receiver_id === user.id
+    // 3. Fetch profiles for all involved users to check roles and names
+    const { data: profiles } = await adminSupabase
+        .from('profiles')
+        .select('id, full_name, email, avatar_url, role')
+        .in('id', Array.from(userIds))
 
-        if (!conversationsMap.has(otherUserId)) {
-            conversationsMap.set(otherUserId, {
-                userId: otherUserId,
-                user: otherUser,
+    const profilesMap = new Map()
+    profiles?.forEach(p => profilesMap.set(p.id, p))
+
+    // 4. Group conversations by "End User"
+    // We want to list conversations with users who are NOT admins/moderators if possible,
+    // or just list everyone we talked to.
+    // Strategy: For each message, find the "counterparty".
+    // If sender is admin-role, counterparty is receiver.
+    // If receiver is admin-role, counterparty is sender.
+    // Note: This logic assumes conversation is usually Admin <-> User.
+
+    // To simplify: We list "Users" who have messages.
+    // A "User" definition here: Someone who is NOT an admin/moderator, OR just anyone displayed as a thread.
+    // Let's filter out "admin/moderator" from the thread list view, treating them as the "Operator" side.
+    // But wait, what if an admin messages another admin?
+    // For now, let's treat every unique user ID that is NOT 'admin'/'moderator' as a thread entry.
+
+    const threadsMap = new Map()
+
+    messages.forEach(msg => {
+        const sender = profilesMap.get(msg.sender_id)
+        const receiver = profilesMap.get(msg.receiver_id)
+
+        // Identify the "Customer" side of the conversation
+        let customerId = null
+        let customerProfile = null
+
+        const isSenderAdmin = sender?.role === 'admin' || sender?.role === 'moderator'
+        const isReceiverAdmin = receiver?.role === 'admin' || receiver?.role === 'moderator'
+
+        if (!isSenderAdmin) {
+            customerId = msg.sender_id
+            customerProfile = sender
+        } else if (!isReceiverAdmin) {
+            customerId = msg.receiver_id
+            customerProfile = receiver
+        } else {
+            // Both are admins, or role fetch failed.
+            // Skip admin-to-admin chat for this user list view to keep it clean for "Customer Support" style
+            return
+        }
+
+        if (!customerId) return // Should not happen given logic above
+
+        // Determine if this message is unread (User sent it, and it's not read)
+        // Note: msg.receiver_id is the admin side in this context
+        const isUnread = !msg.is_read && msg.sender_id === customerId
+
+        if (!threadsMap.has(customerId)) {
+            threadsMap.set(customerId, {
+                userId: customerId,
+                user: customerProfile,
                 lastMessage: msg,
                 unreadCount: isUnread ? 1 : 0
             })
-        } else if (isUnread) {
-            const entry = conversationsMap.get(otherUserId)
-            entry.unreadCount += 1
+        } else {
+            const thread = threadsMap.get(customerId)
+            if (isUnread) {
+                thread.unreadCount += 1
+            }
+            // Messages are ordered desc, so the first one we see is the lastMessage.
+            // No need to update lastMessage unless we iterate differently.
         }
     })
 
-    const conversations = Array.from(conversationsMap.values())
+    const conversations = Array.from(threadsMap.values())
 
     return (
         <main className="mx-auto max-w-4xl py-10 px-4">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-black text-gray-900">メッセージ一覧</h1>
                 <div className="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold border border-indigo-100">
-                    管理者用
+                    全ユーザー
                 </div>
             </div>
 
@@ -82,6 +132,9 @@ export default async function AdminMessagesPage() {
                                     <div className="flex items-center justify-between mb-1">
                                         <div className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                                             {conv.user?.full_name || conv.user?.email || 'Unknown User'}
+                                            <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                                                {conv.user?.role === 'lead' ? 'アム出し' : conv.user?.role === 'member' ? 'メンバー' : 'ユーザー'}
+                                            </span>
                                         </div>
                                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
                                             {new Date(conv.lastMessage.created_at).toLocaleDateString('ja-JP')}
@@ -89,8 +142,8 @@ export default async function AdminMessagesPage() {
                                     </div>
                                     <div className="flex items-center justify-between gap-4">
                                         <p className="text-sm text-gray-500 truncate leading-relaxed">
-                                            {conv.lastMessage.sender_id === user.id && (
-                                                <span className="text-gray-400 font-medium mr-1.5 line-through decoration-transparent">You:</span>
+                                            {conv.lastMessage.sender_id !== conv.userId && (
+                                                <span className="text-gray-400 font-medium mr-1.5 line-through decoration-transparent">Admin:</span>
                                             )}
                                             {conv.lastMessage.content}
                                         </p>

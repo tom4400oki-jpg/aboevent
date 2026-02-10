@@ -12,7 +12,8 @@ export default function ProfileForm({
     initialGender,
     initialBirthdate,
     initialResidence,
-    initialReferralSource
+    initialReferralSource,
+    isAdmin
 }: {
     initialFullName: string | null
     initialAvatarUrl: string | null
@@ -21,6 +22,7 @@ export default function ProfileForm({
     initialBirthdate: string | null
     initialResidence: string | null
     initialReferralSource: string | null
+    isAdmin?: boolean
 }) {
     const [loading, setLoading] = useState(false)
     const [avatarLoading, setAvatarLoading] = useState(false)
@@ -139,10 +141,9 @@ export default function ProfileForm({
                 <p className="mt-2 text-xs text-gray-500">クリックして画像を変更</p>
             </div>
 
-            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mb-6">
-                <p className="text-sm text-indigo-700 font-medium">
-                    ログイン中のメールアドレス: <span className="font-bold">{email}</span>
-                    <span className="block text-xs font-normal mt-1 opacity-80">※プロフィール設定画面では非表示になります（管理者のみ確認可能）</span>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
+                <p className="text-sm text-gray-700 font-medium">
+                    メールアドレス: <span className="font-bold">{email}</span>
                 </p>
             </div>
 

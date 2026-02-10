@@ -1,11 +1,11 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import ProfileForm from './profile-form'
+import { getEffectiveUser, isAdmin } from '@/utils/admin'
 
 export default async function MyPage() {
     const supabase = await createClient()
-
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getEffectiveUser()
 
     if (!user) {
         redirect('/login')
@@ -16,6 +16,8 @@ export default async function MyPage() {
         .select('*')
         .eq('id', user.id)
         .single()
+
+    const isUserAdmin = await isAdmin()
 
     return (
         <main className="mx-auto max-w-2xl py-10 px-4 sm:px-6 lg:px-8">
@@ -31,6 +33,7 @@ export default async function MyPage() {
                         initialBirthdate={profile?.birthdate ?? null}
                         initialResidence={profile?.residence ?? null}
                         initialReferralSource={profile?.referral_source ?? null}
+                        isAdmin={isUserAdmin}
                     />
                 </div>
             </div>

@@ -2,19 +2,16 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import EventList from '@/components/event-list'
-import AdminRoleFilter from '@/components/admin-role-filter'
-import { isAdmin } from '@/utils/admin'
 
 export const revalidate = 60
 
 export default async function Home({
     searchParams,
 }: {
-    searchParams: Promise<{ category?: string, previewRole?: string }>
+    searchParams: Promise<{ category?: string }>
 }) {
     // 現在のフィルタ状態を取得
-    const { category, previewRole } = await searchParams
-    const isUserAdmin = await isAdmin()
+    const { category } = await searchParams
 
     return (
         <main className="space-y-8">
@@ -45,12 +42,6 @@ export default async function Home({
             </section>
 
             <div className="space-y-6" id="events">
-                {/* 管理者用ロールフィルター */}
-                {isUserAdmin && (
-                    <Suspense fallback={null}>
-                        <AdminRoleFilter />
-                    </Suspense>
-                )}
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <h2 className="text-2xl font-bold text-gray-900">募集中イベント</h2>
@@ -58,35 +49,35 @@ export default async function Home({
                     {/* フィルター */}
                     <div className="flex gap-2 text-sm font-medium overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto no-scrollbar">
                         <Link
-                            href={previewRole ? `/?previewRole=${previewRole}` : '/'}
+                            href="/"
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${!category || category === 'all' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
                             すべて
                         </Link>
                         <Link
-                            href={previewRole ? `/?category=tennis&previewRole=${previewRole}` : '/?category=tennis'}
+                            href="/?category=tennis"
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'tennis' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
                             テニス
                         </Link>
                         <Link
-                            href={previewRole ? `/?category=futsal&previewRole=${previewRole}` : '/?category=futsal'}
+                            href="/?category=futsal"
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'futsal' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
                             フットサル
                         </Link>
                         <Link
-                            href={previewRole ? `/?category=volleyball&previewRole=${previewRole}` : '/?category=volleyball'}
+                            href="/?category=volleyball"
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'volleyball' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
                             バレー
                         </Link>
                         <Link
-                            href={previewRole ? `/?category=other&previewRole=${previewRole}` : '/?category=other'}
+                            href="/?category=other"
                             scroll={false}
                             className={`px-4 py-2 rounded-full transition-colors whitespace-nowrap ${category === 'other' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-50 ring-1 ring-gray-200'}`}
                         >
@@ -96,7 +87,7 @@ export default async function Home({
                 </div>
 
                 <Suspense
-                    key={`${category}-${previewRole}`}
+                    key={`${category}`}
                     fallback={
                         <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -109,11 +100,12 @@ export default async function Home({
                         </div>
                     }
                 >
-                    <EventList category={category} previewRole={isUserAdmin ? previewRole : undefined} />
+                    <EventList category={category} />
                 </Suspense>
             </div>
         </main>
     )
 }
+
 
 

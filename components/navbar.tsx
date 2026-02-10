@@ -2,10 +2,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import UserMenu from '@/components/user-menu'
+import AdminSwitcher from '@/components/admin-switcher'
+import { getEffectiveUser, isViewAsUser, getEffectiveRole } from '@/utils/admin'
 
 export default async function Navbar() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getEffectiveUser()
+
     // ログイン中のユーザー情報を取得
     const { data: profile } = user ? await supabase
         .from('profiles')
@@ -15,6 +18,18 @@ export default async function Navbar() {
 
     const role = (profile?.role as 'admin' | 'moderator' | 'user' | 'lead' | 'member') || 'user'
     const avatarUrl = profile?.avatar_url
+    const isPreview = await isViewAsUser()
+
+    // プレビューモード（ユーザーとして表示）の場合はロールを'user'として扱う
+    // プレビューモード（ユーザーとして表示）の場合はロールを'user'として扱う
+    const effectiveRole = isPreview && (role === 'admin' || role === 'moderator') ? 'user' : role
+
+    // メッセージのリンク先を決定
+    // 管理者・副管理者で、かつプレビューモードでない場合は管理者用一覧へ
+    const messageLink = (role === 'admin' || role === 'moderator') && !isPreview
+        ? '/admin/messages'
+        : '/messages'
+
 
     // ログイン中のユーザーの未読メッセージ数を取得
     let unreadCount = 0
@@ -27,6 +42,7 @@ export default async function Navbar() {
 
         unreadCount = count || 0
     }
+
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
@@ -56,8 +72,11 @@ export default async function Navbar() {
                 <div className="flex items-center gap-6">
                     {user ? (
                         <div className="flex items-center gap-3">
+                            {(role === 'admin' || role === 'moderator' || isPreview) && (
+                                <AdminSwitcher initialIsPreview={isPreview} />
+                            )}
                             <Link
-                                href="/messages"
+                                href={messageLink}
                                 className="relative flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors text-gray-600 hover:text-indigo-600"
                                 aria-label="メッセージ"
                             >
@@ -71,7 +90,7 @@ export default async function Navbar() {
                                     </span>
                                 )}
                             </Link>
-                            <UserMenu email={user.email} role={role} avatarUrl={avatarUrl} />
+                            <UserMenu email={user.email} role={effectiveRole} avatarUrl={avatarUrl} />
                         </div>
                     ) : (
                         <Link
@@ -103,8 +122,11 @@ export default async function Navbar() {
                     <div className="flex items-center gap-2">
                         {user ? (
                             <>
+                                {(role === 'admin' || role === 'moderator' || isPreview) && (
+                                    <AdminSwitcher initialIsPreview={isPreview} />
+                                )}
                                 <Link
-                                    href="/messages"
+                                    href={messageLink}
                                     className="relative flex items-center justify-center h-9 w-9 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
                                     aria-label="メッセージ"
                                 >
@@ -118,7 +140,7 @@ export default async function Navbar() {
                                         </span>
                                     )}
                                 </Link>
-                                <UserMenu email={user.email} role={role} avatarUrl={avatarUrl} />
+                                <UserMenu email={user.email} role={effectiveRole} avatarUrl={avatarUrl} />
                             </>
                         ) : (
                             <Link
