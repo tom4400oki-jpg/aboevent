@@ -33,6 +33,10 @@ export async function signup(formData: FormData) {
     const { error } = await supabase.auth.signUp(data)
 
     if (error) {
+        console.error('Signup Error:', error)
+        if (error.message === 'User already registered') {
+            return { error: 'このメールアドレスは既に登録されています。過去にゲスト予約などを利用された場合は、ログイン画面の「パスワードをお忘れの方」からパスワードを設定してください。' }
+        }
         return { error: error.message }
     }
 

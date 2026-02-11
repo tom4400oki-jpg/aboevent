@@ -1,18 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { login, signup } from './actions'
+import { signup } from '../login/actions'
 import { createClient } from '../../utils/supabase/client'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function SignupPage() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (formData: FormData) => {
         setLoading(true)
         setError(null)
-        const res = await login(formData)
+        const res = await signup(formData)
         if (res?.error) {
             setError(res.error)
             setLoading(false)
@@ -25,7 +25,6 @@ export default function LoginPage() {
 
         const supabase = createClient()
         const redirectTo = `${window.location.origin}/auth/callback?next=/mypage`
-
 
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -50,13 +49,18 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-gray-900">
-                    アカウントにログイン
+                    アカウントを新規作成
                 </h2>
+                <p className="mt-2 text-center text-sm text-gray-600">
+                    <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+                        すでにアカウントをお持ちの方
+                    </Link>
+                </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl ring-1 ring-gray-100 sm:rounded-2xl sm:px-10">
-                    {/* Googleログインボタン */}
+                    {/* Google登録ボタン */}
                     <button
                         onClick={handleGoogleLogin}
                         disabled={loading}
@@ -80,11 +84,19 @@ export default function LoginPage() {
                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                             />
                         </svg>
-                        Googleでログイン
+                        Googleで新規登録
                     </button>
 
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-200" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">または</span>
+                        </div>
+                    </div>
 
-                    <form className="space-y-6">
+                    <form action={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 メールアドレス
@@ -111,18 +123,11 @@ export default function LoginPage() {
                                     id="password"
                                     name="password"
                                     type="password"
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                     required
                                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     placeholder="••••••••"
                                 />
-                            </div>
-                            <div className="flex items-center justify-end mt-1">
-                                <div className="text-sm">
-                                    <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                        パスワードをお忘れの方
-                                    </Link>
-                                </div>
                             </div>
                         </div>
 
@@ -143,29 +148,12 @@ export default function LoginPage() {
 
                         <div className="flex flex-col gap-3">
                             <button
-                                formAction={handleSubmit}
+                                type="submit"
                                 disabled={loading}
                                 className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                type="submit"
                             >
-                                ログイン
+                                {loading ? '登録中...' : '新規登録'}
                             </button>
-
-                            <div className="relative my-4">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-gray-200" />
-                                </div>
-                                <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-white text-gray-500">初めての方はこちら</span>
-                                </div>
-                            </div>
-
-                            <Link
-                                href="/signup"
-                                className="w-full flex justify-center py-2.5 px-4 border border-indigo-600 rounded-lg shadow-sm text-sm font-bold text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                            >
-                                新規登録
-                            </Link>
                         </div>
                     </form>
                 </div>

@@ -18,7 +18,6 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, a
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [isGuestBooking, setIsGuestBooking] = useState(false) // ゲスト予約モード
 
     const handleFormSubmit = async (formData: FormData) => {
         // If transportation is not asked, set defaults
@@ -34,14 +33,8 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, a
                 setError(res.error)
             } else {
                 setIsModalOpen(false) // Close modal on success
-                setIsGuestBooking(false)
             }
         })
-    }
-
-    const openGuestModal = () => {
-        setIsGuestBooking(true)
-        setIsModalOpen(true)
     }
 
     // Shared classes for consistency
@@ -79,28 +72,17 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, a
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 pb-8 safe-area-pb shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40">
                 <div className="mx-auto max-w-lg space-y-3">
                     {!loggedIn ? (
-                        <>
-                            <Link
-                                href={disabled ? "#" : "/login"}
-                                className={`${buttonClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-700 shadow-gray-200'}`}
-                                onClick={(e) => disabled && e.preventDefault()}
-                            >
-                                {disabled ? '受付終了しました' : 'ログインして予約する'}
-                            </Link>
-                            {!disabled && (
-                                <button
-                                    onClick={openGuestModal}
-                                    className="flex items-center justify-center w-full rounded-lg py-3 font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition active:scale-95 border border-indigo-200"
-                                >
-                                    初めての方（ゲスト予約）
-                                </button>
-                            )}
-                        </>
+                        <Link
+                            href={disabled ? "#" : "/login"}
+                            className={`${buttonClasses} ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-700 shadow-gray-200'}`}
+                            onClick={(e) => disabled && e.preventDefault()}
+                        >
+                            {disabled ? '受付終了しました' : 'ログインして予約する'}
+                        </Link>
                     ) : (
                         <button
                             onClick={() => {
                                 if (!disabled) {
-                                    setIsGuestBooking(false)
                                     setIsModalOpen(true)
                                 }
                             }}
@@ -119,7 +101,7 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, a
                     <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-indigo-50/50 sticky top-0 backdrop-blur-md z-10">
                             <h3 className="text-lg font-bold text-gray-900">
-                                {isGuestBooking ? 'ゲスト予約情報の入力' : '予約情報の入力'}
+                                予約情報の入力
                             </h3>
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -133,36 +115,7 @@ export default function ReserveButton({ eventId, loggedIn, isBooked, disabled, a
                             <form action={handleFormSubmit} className="space-y-6">
                                 <input type="hidden" name="eventId" value={eventId} />
 
-                                {isGuestBooking && (
-                                    <>
-                                        <div className="space-y-3">
-                                            <label className="block text-sm font-bold text-gray-700">
-                                                お名前 <span className="text-gray-500 font-normal text-xs">（あとで変更可）</span> <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="guest_name"
-                                                required
-                                                placeholder="山田 太郎"
-                                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            />
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="block text-sm font-bold text-gray-700">
-                                                メールアドレス <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="email"
-                                                name="guest_email"
-                                                required
-                                                placeholder="example@email.com"
-                                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                                {askTransportation && !isGuestBooking && (
+                                {askTransportation && (
                                     <>
                                         <div className="space-y-3">
                                             <label className="block text-sm font-bold text-gray-700">
