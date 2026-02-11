@@ -7,8 +7,11 @@ const REFERRAL_COOKIE_NAME = 'referral_code'
 export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl
     const code = searchParams.get('code')
-    const next = searchParams.get('next') ?? '/'
+    let next = searchParams.get('next') ?? '/'
     const error = searchParams.get('error')
+
+    // デバッグ用: パラメータ確認
+    console.log('Auth Callback Params:', { code: !!code, next, error, all: Object.fromEntries(searchParams.entries()) })
     const errorDescription = searchParams.get('error_description')
 
     // 正しい公開URLを取得

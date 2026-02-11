@@ -29,12 +29,12 @@ export default async function Home({
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-purple-900/80"></div>
                 </div>
 
-                <div className="relative z-10 px-6 py-10 text-center sm:px-12 md:py-14">
-                    <h2 className="text-4xl font-black tracking-tight text-white sm:text-6xl mb-6 drop-shadow-lg">
+                <div className="relative z-10 px-6 py-10 text-center sm:px-8 sm:py-14">
+                    <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl mb-4 drop-shadow-lg leading-[1.2]">
                         新しい<span className="text-orange-400">体験</span>を、<br className="sm:hidden" />
                         ここから始めよう
                     </h2>
-                    <p className="mx-auto max-w-2xl text-indigo-100 text-lg sm:text-xl mb-6 leading-relaxed font-medium">
+                    <p className="mx-auto max-w-2xl text-indigo-100 text-sm sm:text-base md:text-lg mb-6 leading-relaxed font-medium">
                         テニス、フットサル、そして新しい仲間。<br className="hidden sm:inline" />
                         あなたの日常に「熱狂」と「笑顔」をプラスします。
                     </p>

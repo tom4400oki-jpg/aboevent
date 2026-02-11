@@ -131,6 +131,13 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                 />
                             </div>
+                            <div className="flex items-center justify-end mt-1">
+                                <div className="text-sm">
+                                    <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+                                        パスワードをお忘れの方
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
 
                         {error && (

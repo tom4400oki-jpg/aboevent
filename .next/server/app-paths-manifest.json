@@ -10,7 +10,6 @@
   "/admin/reports/[id]/edit/page": "app/admin/reports/[id]/edit/page.js",
   "/admin/reports/new/page": "app/admin/reports/new/page.js",
   "/admin/reports/page": "app/admin/reports/page.js",
-  "/admin/settings/page": "app/admin/settings/page.js",
   "/admin/users/[id]/edit/page": "app/admin/users/[id]/edit/page.js",
   "/admin/users/page": "app/admin/users/page.js",
   "/auth/callback/route": "app/auth/callback/route.js",

@@ -17,32 +17,74 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+    metadataBase: new URL('https://funny-spo.netlify.app'),
     title: {
-        default: 'Funny-Spo | 横浜・戸塚の「笑って痩せる」社会人スポーツサークル',
-        template: '%s | Funny-Spo'
+        default: 'Funny-Spo | 横浜・戸塚の「大人の放課後」 20・30代のゆるスポーツ＆遊び場',
+        template: '%s | Funny-Spo 横浜のゆるスポーツコミュニティ',
     },
-    description: '横浜・戸塚・東戸塚・神奈川で活動中！Funny-Spo（ファニスポ）は、運動不足の社会人が集まる「世界一ゆるい」スポーツサークルです。テニス、フットサル、バレーボールを遊び感覚で楽しみながら、ダイエットと友達作りを叶えます。初心者・1人参加大歓迎！',
-    keywords: ['横浜', '戸塚', '東戸塚', '神奈川', '社会人サークル', 'スポーツサークル', 'テニス', 'フットサル', 'バレーボール', 'ダイエット', '運動不足解消'],
+    description:
+        '週末、スマホを見て終わっていませんか？Funny-Spo（ファニスポ）は、横浜・神奈川で活動する20代・30代のための「大人の放課後」です。テニス・フットサル・BARイベントを通じて、学生時代の「あの熱狂」と「利害関係のない仲間」に出会えます。運動が苦手でも大丈夫、初心者・1人参加大歓迎。運動不足も孤独も、ここで笑い飛ばそう。',
+    keywords: [
+        '横浜',
+        '戸塚',
+        '社会人サークル',
+        '20代',
+        '30代',
+        '大人の放課後',
+        '友達作り',
+        'ゆるスポーツ',
+        'サードプレイス',
+        'テニス',
+        'フットサル',
+        'イベント',
+    ],
+    authors: [{ name: 'Funny-Spo 運営事務局' }],
+    creator: 'Funny-Spo',
+    publisher: 'Funny-Spo',
+    formatDetection: {
+        email: false,
+        address: false,
+        telephone: false,
+    },
+    icons: {
+        icon: '/icon.png',
+        apple: '/apple-icon.png',
+    },
     openGraph: {
-        title: 'Funny-Spo | 横浜・戸塚の「笑って痩せる」社会人スポーツサークル',
-        description: '初心者・お一人様大歓迎！横浜・戸塚を中心に活動する世界一ゆるい社会人スポーツサークルです。',
-        url: 'https://funny-spo.vercel.app',
+        title: 'Funny-Spo | 横浜・戸塚の「大人の放課後」',
+        description: '週末、スマホを見て終わっていませんか？20代・30代のための「世界一ゆるい」スポーツ遊び場。テニス・フットサルで新しい仲間と出会おう。',
+        url: 'https://funny-spo.netlify.app',
         siteName: 'Funny-Spo',
-        images: [
-            {
-                url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80',
-                width: 1200,
-                height: 630,
-            },
-        ],
         locale: 'ja_JP',
         type: 'website',
+        images: [
+            {
+                url: '/og-image.png',
+                width: 1200,
+                height: 630,
+                alt: 'Funny-Spo 大人の放課後',
+            },
+        ],
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Funny-Spo | 横浜・戸塚の「笑って痩せる」社会人スポーツサークル',
-        description: '初心者・お一人様大歓迎！横浜・戸塚を中心に活動する世界一ゆるい社会人スポーツサークルです。',
-        images: ['https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80'],
+        title: 'Funny-Spo | 横浜・戸塚の「大人の放課後」',
+        description: '運動が苦手でも大丈夫！20代・30代が集まる横浜のゆるスポーツコミュニティ。',
+        images: ['/og-image.png'],
+    },
+    alternates: {
+        canonical: '/',
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
     },
     verification: {
         google: 'HHrQaKG5M1YlkTiB6U_T1AYJsdcdeCVlNf7ZWC_sYMA',
@@ -54,9 +96,20 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode
 }) {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Funny-Spo',
+        url: 'https://funny-spo.netlify.app',
+    }
+
     return (
         <html lang="ja">
             <head>
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
                 {GA_MEASUREMENT_ID && (
                     <>
                         <Script

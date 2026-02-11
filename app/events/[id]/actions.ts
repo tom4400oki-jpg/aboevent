@@ -20,13 +20,67 @@ export async function bookEvent(formData: FormData) {
     const user = await getEffectiveUser() // The user to book for (could be dummy or helper)
     const { data: { user: realUser } } = await supabase.auth.getUser() // The actually logged-in user
 
-    if (!user || !realUser) {
-        return { error: '予約するにはログインが必要です。' }
+    let targetUserId = user?.id
+    let isGuest = false
+
+    // ゲスト予約の処理 (ログインしていない場合)
+    if (!targetUserId) {
+        const guestName = formData.get('guest_name') as string
+        const guestEmail = formData.get('guest_email') as string
+
+        if (!guestName || !guestEmail) {
+            return { error: '予約するにはログインするか、ゲスト情報を入力してください。' }
+        }
+
+        // Admin Clientでユーザー作成または取得
+        const adminClient = createAdminClient()
+
+        // 新規ユーザー作成
+        const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+        const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+            email: guestEmail,
+            password: tempPassword,
+            email_confirm: true, // 自動確認済みにする
+            user_metadata: { full_name: guestName }
+        })
+
+        if (createError) {
+            console.error('Guest user creation error:', createError)
+            // 重複エラーの場合 (Supabase Auth APIのエラーメッセージやステータスコードに依存)
+            // 一般的に 422 Unprocessable Entity や 特定のメッセージが含まれる
+            if (createError.message?.includes('already been registered') || createError.status === 422) {
+                return { error: 'このメールアドレスは既に登録されています。ログインして予約してください。' }
+            }
+            return { error: 'ゲストユーザーの作成に失敗しました。' }
+        }
+
+        if (!newUser.user) {
+            return { error: 'ゲストユーザーの作成に失敗しました（ユーザーデータなし）。' }
+        }
+
+        targetUserId = newUser.user.id
+        isGuest = true
+
+        // プロフィール作成 (Triggerで作成される場合もあるが、念のため/名前を確実に入れるため)
+        // ※ トリガーで作成される場合、Duplicate Key Errorになる可能性があるため、upsertを使用
+        const { error: profileError } = await adminClient
+            .from('profiles')
+            .upsert({
+                id: targetUserId,
+                full_name: guestName,
+                avatar_url: '',
+                role: 'user'
+            }, { onConflict: 'id' })
+
+        if (profileError) {
+            console.error('Profile creation error:', profileError)
+            // プロフィール作成失敗しても予約は続行させるか？ -> 続行させる
+        }
     }
 
     // Check if the real user acts as admin/moderator to bypass RLS if needed
-    let useAdminClient = false
-    if (user.id !== realUser.id) {
+    let useAdminClient = isGuest // ゲストの場合は必ずAdmin Clientを使用
+    if (!isGuest && user && realUser && user.id !== realUser.id) {
         const { data: profile } = await supabase
             .from('profiles')
             .select('role')
@@ -44,14 +98,14 @@ export async function bookEvent(formData: FormData) {
     const cookieStore = await cookies()
     const referrerIdFromCookie = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
     // 自分自身を紹介者にしない
-    const referrerId = (referrerIdFromCookie && referrerIdFromCookie !== user.id) ? referrerIdFromCookie : null
+    const referrerId = (referrerIdFromCookie && referrerIdFromCookie !== targetUserId) ? referrerIdFromCookie : null
 
     // 2. Insert booking
     const { error: insertError } = await dbClient
         .from('bookings')
         .insert({
             event_id: eventId,
-            user_id: user.id,
+            user_id: targetUserId!,
             transportation,
             pickup_needed,
             referrer_id: referrerId,
@@ -79,7 +133,9 @@ export async function bookEvent(formData: FormData) {
         const eventDate = new Date(event.start_at).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' })
         const messageContent = `イベントの予約が完了しました！🎉\n\n📅 イベント: ${event.title}\n⏰ 日時: ${eventDate}\n\n当日お会いできるのを楽しみにしています！\n不明点があれば、このチャットでいつでもご質問ください。`
 
-        await sendSystemMessage(user.id, messageContent)
+        if (targetUserId) {
+            await sendSystemMessage(targetUserId, messageContent)
+        }
     }
 
     // 4. Revalidate page
