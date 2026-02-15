@@ -42,11 +42,31 @@ export async function bookEvent(formData: FormData) {
 
     const dbClient = useAdminClient ? createAdminClient() : supabase
 
-    // リファラルCookieから紹介者IDを取得
+    // リファラルCookieから紹介コードを取得
     const cookieStore = await cookies()
-    const referrerIdFromCookie = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
-    // 自分自身を紹介者にしない
-    const referrerId = (referrerIdFromCookie && referrerIdFromCookie !== targetUserId) ? referrerIdFromCookie : null
+    const referralCode = cookieStore.get(REFERRAL_COOKIE_NAME)?.value || null
+
+    // 紹介コードから紹介者ID（UUID）を検索
+    let referrerId: string | null = null
+    if (referralCode) {
+        try {
+            // RLSを回避して検索するためAdminClientを使用
+            const supabaseAdmin = createAdminClient()
+            const { data: referrerProfile } = await supabaseAdmin
+                .from('profiles')
+                .select('id')
+                .eq('referral_code', referralCode)
+                .single()
+
+            // 自分自身を紹介者にしない
+            if (referrerProfile && referrerProfile.id !== targetUserId) {
+                referrerId = referrerProfile.id
+            }
+        } catch (e) {
+            console.error('Referral lookup error:', e)
+            // エラーでも予約は続行（紹介なし扱い）
+        }
+    }
 
     // 2. Insert booking
     const { error: insertError } = await dbClient
