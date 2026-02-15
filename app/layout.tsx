@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
@@ -129,7 +130,9 @@ export default async function RootLayout({
                 )}
             </head>
             <body className={`${inter.className} min-h-screen flex flex-col`}>
-                <ReferralTracker />
+                <Suspense fallback={null}>
+                    <ReferralTracker />
+                </Suspense>
                 <Navbar />
                 <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {children}
