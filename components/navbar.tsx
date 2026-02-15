@@ -65,7 +65,7 @@ export default async function Navbar() {
                         イベント
                     </Link>
                     <Link href="/reports" className="text-sm font-bold text-gray-600 hover:text-indigo-600 transition-colors">
-                        フォトログ
+                        ブログ
                     </Link>
                 </div>
 
@@ -159,7 +159,7 @@ export default async function Navbar() {
                         イベント
                     </Link>
                     <Link href="/reports" className="text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors">
-                        フォトログ
+                        ブログ
                     </Link>
                 </div>
             </div>

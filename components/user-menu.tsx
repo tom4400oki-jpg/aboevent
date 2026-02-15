@@ -98,7 +98,16 @@ export default function UserMenu({ email, role, avatarUrl }: UserMenuProps) {
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <span className="mr-3 text-orange-400 group-hover:text-orange-500">📝</span>
-                                    フォトログ
+                                    ブログ管理
+                                </Link>
+
+                                <Link
+                                    href="/admin/referrals"
+                                    className="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <span className="mr-3 text-orange-400 group-hover:text-orange-500">🔗</span>
+                                    紹介トラッキング
                                 </Link>
 
                                 {/* User List - ADMIN ONLY */}

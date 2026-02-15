@@ -86,7 +86,8 @@ export async function GET(request: NextRequest) {
     try {
         const supabaseAdmin = createAdminClient()
         const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null
-        const referralCode = request.cookies.get(REFERRAL_COOKIE_NAME)?.value || null
+        // Cookie または UserMetadata から紹介コードを取得
+        const referralCode = request.cookies.get(REFERRAL_COOKIE_NAME)?.value || user.user_metadata?.referral_code || null
 
         const { data: existingProfile } = await supabaseAdmin
             .from('profiles')

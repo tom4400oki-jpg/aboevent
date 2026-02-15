@@ -97,7 +97,7 @@ export default async function ReportDetailPage({
                             href="/reports"
                             className="text-gray-500 hover:text-indigo-600 font-bold transition-all flex items-center gap-2 group"
                         >
-                            <span className="transition-transform group-hover:-translate-x-1">←</span> レポート一覧へ
+                            <span className="transition-transform group-hover:-translate-x-1">←</span> ブログ一覧へ
                         </Link>
 
                         {report.events && (

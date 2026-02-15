@@ -22,17 +22,17 @@ export default async function AdminReportsPage() {
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 leading-tight">イベントレポート管理</h1>
-                    <p className="text-sm text-gray-500 mt-1">開催したイベントの写真や報告を公開します</p>
+                    <h1 className="text-2xl font-bold text-gray-900 leading-tight">ブログ・活動報告管理</h1>
+                    <p className="text-sm text-gray-500 mt-1">イベントの報告や、日々の出来事をブログとして発信します</p>
                 </div>
                 <Link
                     href="/admin/reports/new"
-                    className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 flex items-center gap-2"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
                 >
-                    <span className="text-lg">✍️</span>
-                    新規作成
+                    <span>＋</span>
+                    新規記事を書く
                 </Link>
             </div>
 

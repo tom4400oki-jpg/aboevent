@@ -23,10 +23,10 @@ export default async function ReportsPage() {
         <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
             <div className="mb-12 text-center">
                 <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-4">
-                    開催レポート
+                    ブログ・活動報告
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                    ファニスポでの活動の様子をお届けします。イベントの雰囲気を感じてみてください！
+                    ファニスポでの活動の様子や、日々の出来事をお届けします！
                 </p>
                 <div className="mt-6 flex justify-center">
                     <div className="h-1.5 w-20 bg-indigo-600 rounded-full"></div>
@@ -37,7 +37,7 @@ export default async function ReportsPage() {
                 {reports?.length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                         <span className="text-4xl block mb-4">📄</span>
-                        <p className="text-gray-500 font-medium">まだレポートが公開されていません</p>
+                        <p className="text-gray-500 font-medium">まだ記事が公開されていません</p>
                     </div>
                 ) : (
                     reports?.map((report) => (
@@ -57,7 +57,7 @@ export default async function ReportsPage() {
                                 )}
                                 <div className="absolute top-4 left-4">
                                     <span className="bg-white/90 backdrop-blur-sm text-indigo-700 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
-                                        REPORT
+                                        BLOG
                                     </span>
                                 </div>
                             </div>
@@ -68,10 +68,15 @@ export default async function ReportsPage() {
                                     <time dateTime={report.created_at}>
                                         {format(new Date(report.created_at), 'yyyy.MM.dd', { locale: ja })}
                                     </time>
-                                    {report.events && report.events.length > 0 && (
+                                    {report.events && report.events.length > 0 ? (
                                         <>
                                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                             <span className="text-indigo-600 uppercase tracking-wider">{report.events[0].title}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <span className="text-indigo-600 uppercase tracking-wider">日常・コラム</span>
                                         </>
                                     )}
                                 </div>

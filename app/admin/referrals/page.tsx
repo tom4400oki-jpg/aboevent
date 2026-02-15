@@ -12,18 +12,25 @@ export default async function AdminReferralsPage() {
 
     const supabaseAdmin = createAdminClient()
 
-    // 全プロフィールを取得 (referral_codeを追加)
+    // 1. 全プロフィールを取得 (referral_codeを追加)
     const { data: profiles } = await supabaseAdmin
         .from('profiles')
         .select('id, full_name, email, avatar_url, referred_by, referral_code')
 
-    // 全予約を取得（referrer_idがあるもの）
+    // 2. 全予約を取得（referrer_idがあるもの）+ 予約者の情報も取得
     const { data: bookingsWithReferrers } = await supabaseAdmin
         .from('bookings')
-        .select('id, referrer_id, user_id, event_id, events(title)')
+        .select(`
+            id, 
+            referrer_id, 
+            user_id, 
+            event_id, 
+            events(title),
+            profiles:user_id(full_name, avatar_url, email)
+        `)
         .not('referrer_id', 'is', null)
 
-    // 訪問記録を取得
+    // 3. 訪問記録を取得
     const { data: visits } = await supabaseAdmin
         .from('referral_visits')
         .select('id, referrer_id, path, visited_at')
@@ -43,27 +50,33 @@ export default async function AdminReferralsPage() {
             }
         })
 
-    // 紹介サインアップ数をカウント
-    const signupCounts: Record<string, number> = {}
+    // 紹介サインアップ詳細を収集
+    const signupsByReferrer: Record<string, any[]> = {}
     profiles.forEach(p => {
         if (p.referred_by) {
-            signupCounts[p.referred_by] = (signupCounts[p.referred_by] || 0) + 1
+            if (!signupsByReferrer[p.referred_by]) {
+                signupsByReferrer[p.referred_by] = []
+            }
+            signupsByReferrer[p.referred_by].push(p)
         }
     })
 
-    // 紹介予約数をカウント
-    const bookingCounts: Record<string, number> = {}
+    // 紹介予約詳細を収集
+    const bookingsByReferrer: Record<string, any[]> = {}
         ; (bookingsWithReferrers || []).forEach((b: any) => {
             if (b.referrer_id) {
-                bookingCounts[b.referrer_id] = (bookingCounts[b.referrer_id] || 0) + 1
+                if (!bookingsByReferrer[b.referrer_id]) {
+                    bookingsByReferrer[b.referrer_id] = []
+                }
+                bookingsByReferrer[b.referrer_id].push(b)
             }
         })
 
     // 紹介実績のあるユーザーをリストアップ（訪問も含む）
     const referrerIds = new Set([
         ...Object.keys(visitCounts),
-        ...Object.keys(signupCounts),
-        ...Object.keys(bookingCounts),
+        ...Object.keys(signupsByReferrer),
+        ...Object.keys(bookingsByReferrer),
     ])
 
     // ソート（合計スコアの多い順）
@@ -72,21 +85,21 @@ export default async function AdminReferralsPage() {
             id,
             profile: profileMap.get(id),
             visitCount: visitCounts[id] || 0,
-            signupCount: signupCounts[id] || 0,
-            bookingCount: bookingCounts[id] || 0,
+            signups: signupsByReferrer[id] || [],
+            bookings: bookingsByReferrer[id] || [],
         }))
-        .sort((a, b) => (b.visitCount + b.signupCount + b.bookingCount) - (a.visitCount + a.signupCount + a.bookingCount))
+        .sort((a, b) => (b.visitCount + b.signups.length + b.bookings.length) - (a.visitCount + a.signups.length + a.bookings.length))
 
     // サイトURL
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
     // 合計
     const totalVisits = Object.values(visitCounts).reduce((a, b) => a + b, 0)
-    const totalSignups = Object.values(signupCounts).reduce((a, b) => a + b, 0)
-    const totalBookings = Object.values(bookingCounts).reduce((a, b) => a + b, 0)
+    const totalSignups = Object.values(signupsByReferrer).reduce((a, b) => a + b.length, 0)
+    const totalBookings = Object.values(bookingsByReferrer).reduce((a, b) => a + b.length, 0)
 
     return (
-        <main className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <main className="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">紹介トラッキング</h1>
                 <div className="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold border border-indigo-100">
@@ -113,7 +126,8 @@ export default async function AdminReferralsPage() {
             {/* 紹介者別テーブル */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
-                    <h2 className="text-lg font-bold text-gray-900">紹介者別の実績</h2>
+                    <h2 className="text-lg font-bold text-gray-900">紹介者別の実績（詳細）</h2>
+                    <p className="text-xs text-gray-400 mt-1">数字をクリックすると詳細が開きます</p>
                 </div>
 
                 {referrers.length === 0 ? (
@@ -129,17 +143,18 @@ export default async function AdminReferralsPage() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">紹介者</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">紹介コード</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">閲覧</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">登録</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">予約</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-1/4">紹介者</th>
+                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-[100px]">紹介コード</th>
+                                    <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-[80px]">閲覧</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">登録ユーザー</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">獲得予約</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {referrers.map(referrer => {
                                     return (
-                                        <tr key={referrer.id} className="hover:bg-gray-50 transition-colors">
+                                        <tr key={referrer.id} className="hover:bg-gray-50 transition-colors align-top">
+                                            {/* 紹介者 */}
                                             <td className="px-5 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
                                                     {referrer.profile?.avatar_url ? (
@@ -157,19 +172,75 @@ export default async function AdminReferralsPage() {
                                                     </div>
                                                 </div>
                                             </td>
+
+                                            {/* 紹介コード */}
                                             <td className="px-5 py-4 whitespace-nowrap text-center">
                                                 <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded text-gray-600">
                                                     {referrer.profile?.referral_code || '-'}
                                                 </span>
                                             </td>
+
+                                            {/* 閲覧数 */}
                                             <td className="px-5 py-4 whitespace-nowrap text-center">
                                                 <span className="text-lg font-black text-blue-600">{referrer.visitCount}</span>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap text-center">
-                                                <span className="text-lg font-black text-indigo-600">{referrer.signupCount}</span>
+
+                                            {/* 登録ユーザー（詳細リスト） */}
+                                            <td className="px-5 py-4">
+                                                {referrer.signups.length > 0 ? (
+                                                    <details className="group">
+                                                        <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                                                            <span className="text-lg font-black">{referrer.signups.length}</span>
+                                                            <span className="text-xs font-normal text-gray-500 group-open:hidden">詳細表示 ▼</span>
+                                                            <span className="text-xs font-normal text-gray-500 hidden group-open:inline">閉じる ▲</span>
+                                                        </summary>
+                                                        <div className="mt-3 space-y-2 pl-2 border-l-2 border-indigo-100">
+                                                            {referrer.signups.map((s: any) => (
+                                                                <div key={s.id} className="flex items-center gap-2 text-xs">
+                                                                    {s.avatar_url ? (
+                                                                        <img src={s.avatar_url} className="w-5 h-5 rounded-full" />
+                                                                    ) : (
+                                                                        <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">
+                                                                            {(s.full_name || 'U')[0]}
+                                                                        </div>
+                                                                    )}
+                                                                    <span className="text-gray-700 font-medium">{s.full_name || s.email}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </details>
+                                                ) : (
+                                                    <span className="text-gray-300 text-sm">-</span>
+                                                )}
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap text-center">
-                                                <span className="text-lg font-black text-green-600">{referrer.bookingCount}</span>
+
+                                            {/* 獲得予約（詳細リスト） */}
+                                            <td className="px-5 py-4">
+                                                {referrer.bookings.length > 0 ? (
+                                                    <details className="group">
+                                                        <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-bold text-green-600 hover:text-green-800 transition-colors">
+                                                            <span className="text-lg font-black">{referrer.bookings.length}</span>
+                                                            <span className="text-xs font-normal text-gray-500 group-open:hidden">詳細表示 ▼</span>
+                                                            <span className="text-xs font-normal text-gray-500 hidden group-open:inline">閉じる ▲</span>
+                                                        </summary>
+                                                        <div className="mt-3 space-y-2 pl-2 border-l-2 border-green-100">
+                                                            {referrer.bookings.map((b: any) => (
+                                                                <div key={b.id} className="text-xs">
+                                                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                                                        <span className="font-bold text-gray-700">
+                                                                            {b.profiles?.full_name || '不明なユーザー'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="text-gray-500 pl-1 truncate max-w-[200px]">
+                                                                        → {b.events?.title}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </details>
+                                                ) : (
+                                                    <span className="text-gray-300 text-sm">-</span>
+                                                )}
                                             </td>
                                         </tr>
                                     )

@@ -42,7 +42,7 @@ export default async function EditReportPage({
         <div className="max-w-2xl mx-auto py-8 px-4">
             <div className="mb-8 flex justify-between items-start">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">レポートの編集</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">記事の編集</h1>
                     <p className="text-sm text-gray-500 mt-1">公開中の内容を更新します</p>
                 </div>
                 <Link href={`/reports/${id}`} className="text-xs font-bold text-indigo-600 hover:underline">
@@ -54,7 +54,7 @@ export default async function EditReportPage({
                 <input type="hidden" name="id" value={report.id} />
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-bold text-gray-700">レポートタイトル</label>
+                    <label className="block text-sm font-bold text-gray-700">タイトル</label>
                     <input
                         type="text"
                         name="title"
@@ -82,7 +82,7 @@ export default async function EditReportPage({
                         defaultValue={report.event_id || ''}
                         className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-white"
                     >
-                        <option value="">関連付けなし</option>
+                        <option value="">関連付けなし（日常ブログ）</option>
                         {events?.map(event => (
                             <option key={event.id} value={event.id}>
                                 {new Date(event.start_at).toLocaleDateString('ja-JP')} - {event.title}
@@ -104,7 +104,7 @@ export default async function EditReportPage({
                         type="submit"
                         className="flex-[2] bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-[0.98]"
                     >
-                        更新を保存する
+                        記事を更新する
                     </button>
                 </div>
             </form>

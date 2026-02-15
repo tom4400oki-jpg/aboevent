@@ -4,6 +4,7 @@ import Script from 'next/script'
 import './globals.css'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+import ReferralTracker from '@/components/referral-tracker'
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID
 
@@ -128,6 +129,7 @@ export default async function RootLayout({
                 )}
             </head>
             <body className={`${inter.className} min-h-screen flex flex-col`}>
+                <ReferralTracker />
                 <Navbar />
                 <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {children}
