@@ -89,6 +89,20 @@ export async function GET(request: NextRequest) {
         // Cookie または UserMetadata から紹介コードを取得
         const referralCode = request.cookies.get(REFERRAL_COOKIE_NAME)?.value || user.user_metadata?.referral_code || null
 
+        // 紹介コードから紹介者ID（UUID）を検索
+        let referrerId: string | null = null
+        if (referralCode) {
+            const { data: referrer } = await supabaseAdmin
+                .from('profiles')
+                .select('id')
+                .eq('referral_code', referralCode)
+                .single()
+
+            if (referrer) {
+                referrerId = referrer.id
+            }
+        }
+
         const { data: existingProfile } = await supabaseAdmin
             .from('profiles')
             .select('id, full_name')
@@ -110,7 +124,7 @@ export async function GET(request: NextRequest) {
                     email: user.email,
                     full_name: googleName,
                     role: 'user',
-                    referred_by: referralCode,
+                    referred_by: referrerId, // UUIDを設定
                 })
         }
 
